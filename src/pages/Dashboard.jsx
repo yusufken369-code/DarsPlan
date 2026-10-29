@@ -17,14 +17,16 @@ export default function Dashboard() {
       </section>
 
       {/* ── Lower three-section row ── */}
-      <section className="flex gap-4 items-stretch">
+      <section className="flex flex-col lg:flex-row gap-4 items-stretch">
         {/* Left: Materials */}
         <div className="flex-1 min-w-0">
           <DarsMateriallari />
         </div>
 
         {/* Center: Statistics (fixed width) */}
-        <DarsStatistikasi />
+        <div className="flex justify-center flex-shrink-0">
+          <DarsStatistikasi />
+        </div>
 
         {/* Right: Deadlines */}
         <div className="flex-1 min-w-0">

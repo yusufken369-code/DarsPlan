@@ -236,23 +236,18 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2b3a99] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#2b3a99] flex items-center justify-center p-3 sm:p-4">
 
       {/* ── Two-panel card ─────────────────────────────────── */}
       <div
-        className="w-full shadow-2xl overflow-hidden flex"
+        className="w-full max-w-[440px] md:max-w-[880px] shadow-2xl overflow-hidden flex flex-col md:flex-row rounded-3xl bg-white"
         style={{
-          maxWidth: '880px',
           minHeight: '520px',
-          borderRadius: '24px',
         }}
       >
 
         {/* ═══════════════ LEFT — FORM PANEL ═══════════════ */}
-        <div
-          className="flex flex-col justify-center px-10 py-9 bg-white"
-          style={{ width: '52%', flexShrink: 0 }}
-        >
+        <div className="w-full md:w-[52%] flex-shrink-0 flex flex-col justify-center px-6 py-8 sm:px-10 sm:py-9 bg-white">
           {/* Logo */}
           <div className="flex items-center gap-2 mb-7">
             <div

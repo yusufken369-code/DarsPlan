@@ -69,15 +69,15 @@ function PublicOnlyRoute({ children }) {
 /* ── Dashboard shell layout for protected pages ── */
 function DashboardLayout() {
   return (
-    <div className="min-h-screen bg-[#2b3a99] flex items-start justify-center p-5">
+    <div className="min-h-screen bg-[#2b3a99] flex items-start justify-center p-2 sm:p-5">
       <div
-        className="w-full max-w-[1200px] min-h-[calc(100vh-2.5rem)] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+        className="w-full max-w-[1200px] min-h-[calc(100vh-1rem)] sm:min-h-[calc(100vh-2.5rem)] rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col"
         style={{ background: '#f0f3fa' }}
       >
         <Header />
         <div className="flex flex-1 overflow-hidden">
           <Sidebar />
-          <main className="flex-1 overflow-y-auto p-4 min-w-0">
+          <main className="flex-1 overflow-y-auto p-2.5 sm:p-4 min-w-0">
             <Routes>
               <Route path="/"            element={<Dashboard />} />
               <Route path="/jadval"      element={<DarsJadvali />} />

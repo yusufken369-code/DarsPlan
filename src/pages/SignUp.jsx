@@ -205,13 +205,13 @@ export default function SignUp() {
   }
 
   return (
-    <div className="min-h-screen bg-[#2b3a99] flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#2b3a99] flex items-center justify-center p-3 sm:p-4">
       {/* ── Two-panel card ── */}
-      <div className="w-full max-w-[860px] min-h-[520px] rounded-3xl overflow-hidden shadow-2xl flex">
+      <div className="w-full max-w-[440px] md:max-w-[860px] min-h-[520px] rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row bg-white">
 
         {/* ════ LEFT PANEL ════ */}
         <div
-          className="relative w-[42%] flex-shrink-0 flex flex-col p-8 overflow-hidden hidden md:flex"
+          className="relative w-[42%] flex-shrink-0 flex-col p-8 overflow-hidden hidden md:flex"
           style={{ background: '#2b3a99' }}
         >
           {/* Logo */}
@@ -235,7 +235,7 @@ export default function SignUp() {
         </div>
 
         {/* ════ RIGHT PANEL ════ */}
-        <div className="flex-1 bg-white flex flex-col justify-center px-10 py-8">
+        <div className="flex-1 bg-white flex flex-col justify-center px-6 py-8 sm:px-10">
           {/* Form header */}
           <div className="mb-6">
             <h2 className="text-[#283593] font-extrabold text-[22px]">Ro'yxatdan o'tish</h2>

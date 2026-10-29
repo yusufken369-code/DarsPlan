@@ -178,10 +178,10 @@ export default function Timetable() {
   return (
     <div className="flex flex-col select-none relative">
       {/* ── Top controls bar: chevrons + week range label + day headers + add button ── */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
+        <div className="flex items-center gap-2 flex-wrap">
           {/* Week navigation buttons */}
-          <div className="flex items-center gap-1 bg-white rounded-full p-0.5 shadow-sm border border-gray-100">
+          <div className="flex items-center gap-1 bg-white rounded-full p-0.5 shadow-sm border border-gray-100 flex-shrink-0">
             <button
               onClick={() => setWeekOffset((prev) => prev - 1)}
               className="w-7 h-7 flex items-center justify-center rounded-full text-[#3949ab] hover:bg-indigo-50 transition-colors"
@@ -202,18 +202,18 @@ export default function Timetable() {
           {weekOffset !== 0 ? (
             <button
               onClick={() => setWeekOffset(0)}
-              className="px-2.5 py-1 rounded-lg bg-indigo-50 text-[#3949ab] text-[11px] font-bold hover:bg-indigo-100 transition-colors"
+              className="px-2.5 py-1 rounded-lg bg-indigo-50 text-[#3949ab] text-[11px] font-bold hover:bg-indigo-100 transition-colors flex-shrink-0"
             >
               Joriy hafta
             </button>
           ) : (
-            <span className="text-[11px] font-semibold text-[#3949ab] bg-blue-50/70 px-2.5 py-1 rounded-lg">
+            <span className="text-[11px] font-semibold text-[#3949ab] bg-blue-50/70 px-2.5 py-1 rounded-lg flex-shrink-0">
               Joriy hafta
             </span>
           )}
 
           {/* Week Range Label */}
-          <span className="text-xs font-semibold text-[#455a7a] ml-1">
+          <span className="text-[11px] sm:text-xs font-semibold text-[#455a7a] whitespace-nowrap">
             {weekLabel}
           </span>
         </div>
@@ -221,112 +221,110 @@ export default function Timetable() {
         {/* Add lesson button */}
         <button
           onClick={() => setShowModal(true)}
-          className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#ef5b5b] text-white text-[12px] font-bold hover:bg-[#e53935] shadow-sm transition-all flex-shrink-0"
+          className="self-start sm:self-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#ef5b5b] text-white text-[12px] font-bold hover:bg-[#e53935] shadow-sm transition-all flex-shrink-0"
         >
           <Plus size={14} />
           <span>Dars qo'shish</span>
         </button>
       </div>
 
-      {/* ── Day headers row (All 7 days) ── */}
-      <div className="overflow-x-auto">
-        <div className="flex mb-1" style={{ minWidth: 680 }}>
-          {/* Spacer matching time column width */}
-          <div className="w-11 flex-shrink-0" />
+      {/* ── Single scrollable container for both headers and grid ── */}
+      <div className="overflow-x-auto relative rounded-xl pb-1">
+        <div style={{ minWidth: 640 }}>
+          {/* Day headers row (All 7 days) */}
+          <div className="flex mb-1">
+            <div className="w-10 sm:w-11 flex-shrink-0" />
+            <div className="flex flex-1 min-w-0">
+              {days.map((day) => {
+                const isToday = day.isToday;
+                return (
+                  <div
+                    key={day.dayIndex}
+                    className={`flex-1 text-center px-0.5 py-1 rounded-lg transition-colors ${
+                      isToday ? 'bg-[#ef5b5b]/10' : ''
+                    }`}
+                  >
+                    <div
+                      className="text-[9px] font-semibold tracking-widest uppercase"
+                      style={{ color: isToday ? '#ef5b5b' : '#90a4ae' }}
+                    >
+                      {day.label}
+                    </div>
+                    <div
+                      className="text-sm font-bold flex items-center justify-center gap-1"
+                      style={{ color: isToday ? '#ef5b5b' : '#283593' }}
+                    >
+                      <span>{day.date}</span>
+                      {isToday && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#ef5b5b]" title="Bugun" />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
 
-          {/* 7 Day header columns */}
-          <div className="flex flex-1 min-w-0">
+          {/* Grid (All 7 days) */}
+          <div className="flex relative">
+            {/* Time labels column */}
+            <div className="w-10 sm:w-11 flex-shrink-0 relative" style={{ height: `${gridH}px` }}>
+              {HOURS.map((h, i) => (
+                <div
+                  key={h}
+                  className="absolute right-2 text-right"
+                  style={{ top: `${i * HOUR_H - 7}px` }}
+                >
+                  <span className="text-[10px] font-medium text-[#b0bec5]">{h}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* 7 Day columns: Monday through Sunday */}
             {days.map((day) => {
               const isToday = day.isToday;
+
+              // Correctly match lessons scheduled for this day
+              const dayLessons = (lessons || []).filter((lesson) => {
+                if (lesson.schedule_type === 'date' || (lesson.specific_date && !lesson.is_recurring)) {
+                  return lesson.specific_date === day.fullDate;
+                }
+                return Number(lesson.day) === day.dayIndex;
+              });
+
               return (
                 <div
                   key={day.dayIndex}
-                  className={`flex-1 text-center px-0.5 py-1 rounded-lg transition-colors ${
-                    isToday ? 'bg-[#ef5b5b]/10' : ''
-                  }`}
+                  className="flex-1 relative"
+                  style={{
+                    height: `${gridH}px`,
+                    background: isToday ? 'rgba(239, 91, 91, 0.04)' : 'transparent',
+                    borderLeft: '1px solid #e8edf6',
+                  }}
                 >
-                  <div
-                    className="text-[9px] font-semibold tracking-widest uppercase"
-                    style={{ color: isToday ? '#ef5b5b' : '#90a4ae' }}
-                  >
-                    {day.label}
-                  </div>
-                  <div
-                    className="text-sm font-bold flex items-center justify-center gap-1"
-                    style={{ color: isToday ? '#ef5b5b' : '#283593' }}
-                  >
-                    <span>{day.date}</span>
-                    {isToday && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#ef5b5b]" title="Bugun" />
-                    )}
-                  </div>
+                  {/* Hour grid lines */}
+                  {HOURS.map((_, i) => (
+                    <div
+                      key={i}
+                      className="absolute left-0 right-0"
+                      style={{ top: `${i * HOUR_H}px`, borderTop: '1px solid #edf0f7' }}
+                    />
+                  ))}
+
+                  {/* Lesson cards on this exact day */}
+                  {dayLessons.map((lesson) => (
+                    <LessonCard key={lesson.id} lesson={lesson} onDelete={deleteLesson} />
+                  ))}
                 </div>
               );
             })}
           </div>
         </div>
-      </div>
-
-      {/* ── Grid (All 7 days) ── */}
-      <div className="overflow-x-auto relative">
-        <div className="flex" style={{ minWidth: 680 }}>
-          {/* Time labels column */}
-          <div className="w-11 flex-shrink-0 relative" style={{ height: `${gridH}px` }}>
-            {HOURS.map((h, i) => (
-              <div
-                key={h}
-                className="absolute right-2 text-right"
-                style={{ top: `${i * HOUR_H - 7}px` }}
-              >
-                <span className="text-[10px] font-medium text-[#b0bec5]">{h}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* 7 Day columns: Monday through Sunday */}
-          {days.map((day) => {
-            const isToday = day.isToday;
-
-            // Correctly match lessons scheduled for this day
-            const dayLessons = (lessons || []).filter((lesson) => {
-              if (lesson.schedule_type === 'date' || (lesson.specific_date && !lesson.is_recurring)) {
-                return lesson.specific_date === day.fullDate;
-              }
-              return Number(lesson.day) === day.dayIndex;
-            });
-
-            return (
-              <div
-                key={day.dayIndex}
-                className="flex-1 relative"
-                style={{
-                  height: `${gridH}px`,
-                  background: isToday ? 'rgba(239, 91, 91, 0.04)' : 'transparent',
-                  borderLeft: '1px solid #e8edf6',
-                }}
-              >
-                {/* Hour grid lines */}
-                {HOURS.map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute left-0 right-0"
-                    style={{ top: `${i * HOUR_H}px`, borderTop: '1px solid #edf0f7' }}
-                  />
-                ))}
-
-                {/* Lesson cards on this exact day */}
-                {dayLessons.map((lesson) => (
-                  <LessonCard key={lesson.id} lesson={lesson} onDelete={deleteLesson} />
-                ))}
-              </div>
-            );
-          })}
-        </div>
 
         {/* ── Empty state overlay when no lessons ── */}
         {isEmpty && (
           <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 backdrop-blur-[1px] rounded-xl pointer-events-auto">
-            <div className="p-5 rounded-2xl bg-white shadow-lg border border-gray-100 flex flex-col items-center gap-2 max-w-xs text-center">
+            <div className="p-5 rounded-2xl bg-white shadow-lg border border-gray-100 flex flex-col items-center gap-2 max-w-xs text-center mx-4">
               <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-[#3949ab]">
                 <Calendar size={20} />
               </div>

@@ -50,50 +50,50 @@ export default function Header() {
 
   return (
     <header
-      className="flex items-center px-5 h-[58px] flex-shrink-0 relative"
+      className="flex items-center justify-between px-3 sm:px-5 h-[58px] flex-shrink-0 relative select-none"
       style={{ background: '#ef5b5b' }}
     >
-      {/* Logo area — sits to the left, matches sidebar width */}
-      <div className="flex items-center justify-center w-[62px] flex-shrink-0">
-        <GraduationCap size={26} className="text-white" />
-      </div>
+      {/* Left side: Logo + Greeting */}
+      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-2">
+        {/* Logo area on desktop */}
+        <div className="hidden sm:flex items-center justify-center w-8 sm:w-[50px] flex-shrink-0">
+          <GraduationCap size={24} className="text-white" />
+        </div>
 
-      {/* Greeting */}
-      <div className="flex items-center gap-3 flex-1 ml-2">
-        {/* Avatar */}
+        {/* User Avatar */}
         <div
-          className="w-9 h-9 rounded-full border-2 border-white/60 flex items-center justify-center flex-shrink-0 text-white font-bold text-sm"
+          className="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-white/60 flex items-center justify-center flex-shrink-0 text-white font-bold text-xs sm:text-sm shadow-sm"
           style={{ background: 'rgba(255,255,255,0.25)' }}
         >
           {avatarLetter}
         </div>
-        <div className="flex items-baseline gap-2 flex-wrap">
-          <span className="text-white font-extrabold text-lg leading-none">
+
+        {/* Greeting text */}
+        <div className="flex flex-col justify-center min-w-0">
+          <div className="text-white font-extrabold text-xs sm:text-base leading-tight truncate">
             Salom, {firstName}!
-          </span>
-          <span className="text-white/80 text-sm">
+          </div>
+          <div className="text-white/85 text-[10px] sm:text-xs leading-tight truncate mt-0.5">
             {todayLessons.length > 0 ? (
-              <>
-                Bugun <span className="text-white font-bold">{timeFormatted} soat</span> darsingiz bor
-              </>
+              <>Bugun <strong className="text-white font-bold">{timeFormatted} soat</strong> dars</>
             ) : (
-              <span>Bugun darslar rejalashtirilmagan</span>
+              "Bugun darslar yo'q"
             )}
-          </span>
+          </div>
         </div>
       </div>
 
       {/* Right controls */}
-      <div className="flex items-center gap-5 pr-1">
-        <button className="text-white/80 hover:text-white transition-colors" title="Qidirish">
+      <div className="flex items-center gap-3 sm:gap-5 flex-shrink-0">
+        <button className="hidden sm:flex text-white/80 hover:text-white transition-colors" title="Qidirish">
           <Search size={17} />
         </button>
-        <button className="text-white/80 hover:text-white transition-colors" title="Xabarlar">
+        <button className="hidden sm:flex text-white/80 hover:text-white transition-colors" title="Xabarlar">
           <Mail size={17} />
         </button>
-        <button className="relative text-white/80 hover:text-white transition-colors" title="Bildirishnomalar">
+        <button className="relative text-white/80 hover:text-white transition-colors p-1" title="Bildirishnomalar">
           <Bell size={17} />
-          <span className="absolute -top-0.5 -right-0.5 w-[7px] h-[7px] rounded-full bg-white" />
+          <span className="absolute 0.5 top-0.5 right-0.5 w-[6px] h-[6px] rounded-full bg-white" />
         </button>
 
         {/* Profile dropdown trigger */}
@@ -108,7 +108,7 @@ export default function Header() {
             >
               {avatarLetter}
             </div>
-            <ChevronDown size={14} className="text-white/80" />
+            <ChevronDown size={14} className="text-white/80 hidden sm:block" />
           </button>
 
           {open && (

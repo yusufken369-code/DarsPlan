@@ -420,8 +420,15 @@ export default function Login() {
         </div>
 
         {/* ═══════════════ RIGHT — CLASSROOM PHOTO ═══════════════ */}
-        <div className="flex-1 relative hidden md:block overflow-hidden">
-          <ClassroomScene />
+        <div className="flex-1 relative hidden md:block overflow-hidden bg-[#2e5e3e]">
+          <img
+            src="/classroom-bg.png"
+            alt="Yaxshi ustoz - buyuk kelajak"
+            className="w-full h-full object-cover object-center"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+            }}
+          />
         </div>
 
       </div>

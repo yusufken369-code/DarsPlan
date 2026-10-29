@@ -6,10 +6,11 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import DarsJadvali from './pages/DarsJadvali';
+import DarsRejalari from './pages/DarsRejalari';
 import Sinflar from './pages/Sinflar';
 import Materiallar from './pages/Materiallar';
 import Vazifalar from './pages/Vazifalar';
-import PlaceholderPage from './pages/PlaceholderPage';
+import Sozlamalar from './pages/Sozlamalar';
 import SignUp from './pages/SignUp';
 import Login from './pages/Login';
 
@@ -80,11 +81,11 @@ function DashboardLayout() {
             <Routes>
               <Route path="/"            element={<Dashboard />} />
               <Route path="/jadval"      element={<DarsJadvali />} />
-              <Route path="/rejalar"     element={<PlaceholderPage title="Dars rejalari" />} />
+              <Route path="/rejalar"     element={<DarsRejalari />} />
               <Route path="/sinflar"     element={<Sinflar />} />
               <Route path="/materiallar" element={<Materiallar />} />
               <Route path="/vazifalar"   element={<Vazifalar />} />
-              <Route path="/sozlamalar"  element={<PlaceholderPage title="Sozlamalar" />} />
+              <Route path="/sozlamalar"  element={<Sozlamalar />} />
               <Route path="*"            element={<Navigate to="/" replace />} />
             </Routes>
           </main>

@@ -1,29 +1,69 @@
 import { supabase } from '../lib/supabase.js';
 
-// Helper to get fallback data from localStorage / metadata
-function getLocalUserData(userId) {
-  if (!userId) return { lessons: [], classes: [], materials: [], assignments: [] };
+// Default empty workspace structure for any new user
+const EMPTY_WORKSPACE = {
+  lessons: [],
+  classes: [],
+  materials: [],
+  assignments: [],
+  lessonPlans: [],
+};
+
+// Helper to get user-specific workspace data
+async function getUserWorkspace(userId) {
+  if (!userId) return { ...EMPTY_WORKSPACE };
+
+  const storageKey = `darsplan_workspace_${userId}`;
+
+  // 1. Try local storage cache for this specific user
   try {
-    const raw = localStorage.getItem(`darsplan_workspace_${userId}`);
-    if (raw) {
-      return JSON.parse(raw);
+    const cached = localStorage.getItem(storageKey);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      return { ...EMPTY_WORKSPACE, ...parsed };
     }
   } catch (err) {
-    console.error('Error reading local user data:', err);
+    console.warn('Local storage read warning:', err);
   }
-  return { lessons: [], classes: [], materials: [], assignments: [] };
+
+  // 2. If not in local cache (e.g. new browser/device or after cache clear), fetch from Supabase Auth user metadata
+  try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user && user.id === userId && user.user_metadata?.darsplan_workspace) {
+      const cloudData = user.user_metadata.darsplan_workspace;
+      const merged = { ...EMPTY_WORKSPACE, ...cloudData };
+      // Cache locally for fast subsequent reads
+      try {
+        localStorage.setItem(storageKey, JSON.stringify(merged));
+      } catch {}
+      return merged;
+    }
+  } catch (err) {
+    console.warn('Supabase metadata fetch warning:', err);
+  }
+
+  return { ...EMPTY_WORKSPACE };
 }
 
-function saveLocalUserData(userId, data) {
+// Helper to save user-specific workspace data
+async function saveUserWorkspace(userId, data) {
   if (!userId) return;
+  const storageKey = `darsplan_workspace_${userId}`;
+
+  // 1. Save to local storage for immediate persistence
   try {
-    localStorage.setItem(`darsplan_workspace_${userId}`, JSON.stringify(data));
-    // Asynchronously sync to Supabase user metadata as cloud backup
-    supabase.auth.updateUser({
-      data: { darsplan_workspace: data }
-    }).catch(err => console.warn('Supabase metadata backup failed:', err));
+    localStorage.setItem(storageKey, JSON.stringify(data));
   } catch (err) {
-    console.error('Error saving local user data:', err);
+    console.error('Local storage write error:', err);
+  }
+
+  // 2. Persist to Supabase user metadata (cloud backup per user)
+  try {
+    await supabase.auth.updateUser({
+      data: { darsplan_workspace: data },
+    });
+  } catch (err) {
+    console.warn('Supabase cloud backup sync warning:', err);
   }
 }
 
@@ -41,12 +81,10 @@ export const dataService = {
       if (!error && Array.isArray(data)) {
         return data;
       }
-    } catch {
-      // Table doesn't exist yet, fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    return local.lessons || [];
+    const ws = await getUserWorkspace(userId);
+    return ws.lessons || [];
   },
 
   async addLesson(userId, lesson) {
@@ -62,7 +100,7 @@ export const dataService = {
       start_time: lesson.start_time || lesson.start || '08:00',
       end_time: lesson.end_time || lesson.end || '09:00',
       color: lesson.color || 'navy',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     try {
@@ -75,13 +113,11 @@ export const dataService = {
       if (!error && data) {
         return data;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    local.lessons = [...(local.lessons || []), newLesson];
-    saveLocalUserData(userId, local);
+    const ws = await getUserWorkspace(userId);
+    ws.lessons = [...(ws.lessons || []), newLesson];
+    await saveUserWorkspace(userId, ws);
     return newLesson;
   },
 
@@ -95,19 +131,16 @@ export const dataService = {
         .eq('user_id', userId);
 
       if (!error) {
-        // also sync local
-        const local = getLocalUserData(userId);
-        local.lessons = (local.lessons || []).filter(l => l.id !== lessonId);
-        saveLocalUserData(userId, local);
+        const ws = await getUserWorkspace(userId);
+        ws.lessons = (ws.lessons || []).filter((l) => l.id !== lessonId);
+        await saveUserWorkspace(userId, ws);
         return true;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    local.lessons = (local.lessons || []).filter(l => l.id !== lessonId);
-    saveLocalUserData(userId, local);
+    const ws = await getUserWorkspace(userId);
+    ws.lessons = (ws.lessons || []).filter((l) => l.id !== lessonId);
+    await saveUserWorkspace(userId, ws);
     return true;
   },
 
@@ -124,12 +157,10 @@ export const dataService = {
       if (!error && Array.isArray(data)) {
         return data;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    return local.classes || [];
+    const ws = await getUserWorkspace(userId);
+    return ws.classes || [];
   },
 
   async addClass(userId, classItem) {
@@ -140,7 +171,7 @@ export const dataService = {
       name: classItem.name,
       student_count: Number(classItem.student_count) || 0,
       room: classItem.room || '',
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     try {
@@ -153,13 +184,11 @@ export const dataService = {
       if (!error && data) {
         return data;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    local.classes = [...(local.classes || []), newClass];
-    saveLocalUserData(userId, local);
+    const ws = await getUserWorkspace(userId);
+    ws.classes = [...(ws.classes || []), newClass];
+    await saveUserWorkspace(userId, ws);
     return newClass;
   },
 
@@ -173,18 +202,16 @@ export const dataService = {
         .eq('user_id', userId);
 
       if (!error) {
-        const local = getLocalUserData(userId);
-        local.classes = (local.classes || []).filter(c => c.id !== classId);
-        saveLocalUserData(userId, local);
+        const ws = await getUserWorkspace(userId);
+        ws.classes = (ws.classes || []).filter((c) => c.id !== classId);
+        await saveUserWorkspace(userId, ws);
         return true;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    local.classes = (local.classes || []).filter(c => c.id !== classId);
-    saveLocalUserData(userId, local);
+    const ws = await getUserWorkspace(userId);
+    ws.classes = (ws.classes || []).filter((c) => c.id !== classId);
+    await saveUserWorkspace(userId, ws);
     return true;
   },
 
@@ -201,12 +228,10 @@ export const dataService = {
       if (!error && Array.isArray(data)) {
         return data;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    return local.materials || [];
+    const ws = await getUserWorkspace(userId);
+    return ws.materials || [];
   },
 
   async addMaterial(userId, material) {
@@ -219,7 +244,7 @@ export const dataService = {
       type: material.type || 'PDF',
       file_url: material.file_url || '',
       date: material.date || new Date().toLocaleDateString('uz-UZ'),
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     try {
@@ -232,13 +257,11 @@ export const dataService = {
       if (!error && data) {
         return data;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    local.materials = [newMaterial, ...(local.materials || [])];
-    saveLocalUserData(userId, local);
+    const ws = await getUserWorkspace(userId);
+    ws.materials = [newMaterial, ...(ws.materials || [])];
+    await saveUserWorkspace(userId, ws);
     return newMaterial;
   },
 
@@ -252,18 +275,16 @@ export const dataService = {
         .eq('user_id', userId);
 
       if (!error) {
-        const local = getLocalUserData(userId);
-        local.materials = (local.materials || []).filter(m => m.id !== materialId);
-        saveLocalUserData(userId, local);
+        const ws = await getUserWorkspace(userId);
+        ws.materials = (ws.materials || []).filter((m) => m.id !== materialId);
+        await saveUserWorkspace(userId, ws);
         return true;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    local.materials = (local.materials || []).filter(m => m.id !== materialId);
-    saveLocalUserData(userId, local);
+    const ws = await getUserWorkspace(userId);
+    ws.materials = (ws.materials || []).filter((m) => m.id !== materialId);
+    await saveUserWorkspace(userId, ws);
     return true;
   },
 
@@ -280,12 +301,10 @@ export const dataService = {
       if (!error && Array.isArray(data)) {
         return data;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    return local.assignments || [];
+    const ws = await getUserWorkspace(userId);
+    return ws.assignments || [];
   },
 
   async addAssignment(userId, assignment) {
@@ -299,7 +318,7 @@ export const dataService = {
       due_date: assignment.due_date || new Date().toISOString().split('T')[0],
       due_time: assignment.due_time || '12:00',
       completed: false,
-      created_at: new Date().toISOString()
+      created_at: new Date().toISOString(),
     };
 
     try {
@@ -312,13 +331,11 @@ export const dataService = {
       if (!error && data) {
         return data;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    local.assignments = [...(local.assignments || []), newAssignment];
-    saveLocalUserData(userId, local);
+    const ws = await getUserWorkspace(userId);
+    ws.assignments = [...(ws.assignments || []), newAssignment];
+    await saveUserWorkspace(userId, ws);
     return newAssignment;
   },
 
@@ -332,18 +349,50 @@ export const dataService = {
         .eq('user_id', userId);
 
       if (!error) {
-        const local = getLocalUserData(userId);
-        local.assignments = (local.assignments || []).filter(a => a.id !== assignmentId);
-        saveLocalUserData(userId, local);
+        const ws = await getUserWorkspace(userId);
+        ws.assignments = (ws.assignments || []).filter((a) => a.id !== assignmentId);
+        await saveUserWorkspace(userId, ws);
         return true;
       }
-    } catch {
-      // fallback
-    }
+    } catch {}
 
-    const local = getLocalUserData(userId);
-    local.assignments = (local.assignments || []).filter(a => a.id !== assignmentId);
-    saveLocalUserData(userId, local);
+    const ws = await getUserWorkspace(userId);
+    ws.assignments = (ws.assignments || []).filter((a) => a.id !== assignmentId);
+    await saveUserWorkspace(userId, ws);
     return true;
-  }
+  },
+
+  // ── LESSON PLANS (Dars rejalari) ──
+  async getLessonPlans(userId) {
+    if (!userId) return [];
+    const ws = await getUserWorkspace(userId);
+    return ws.lessonPlans || [];
+  },
+
+  async addLessonPlan(userId, plan) {
+    if (!userId) return null;
+    const newPlan = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `plan_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      user_id: userId,
+      subject: plan.subject,
+      class_name: plan.class_name || '',
+      topic: plan.topic,
+      objective: plan.objective || '',
+      date: plan.date || new Date().toISOString().split('T')[0],
+      created_at: new Date().toISOString(),
+    };
+
+    const ws = await getUserWorkspace(userId);
+    ws.lessonPlans = [newPlan, ...(ws.lessonPlans || [])];
+    await saveUserWorkspace(userId, ws);
+    return newPlan;
+  },
+
+  async deleteLessonPlan(userId, planId) {
+    if (!userId || !planId) return false;
+    const ws = await getUserWorkspace(userId);
+    ws.lessonPlans = (ws.lessonPlans || []).filter((p) => p.id !== planId);
+    await saveUserWorkspace(userId, ws);
+    return true;
+  },
 };

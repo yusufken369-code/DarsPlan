@@ -7,6 +7,7 @@ const DataContext = createContext({
   classes: [],
   materials: [],
   assignments: [],
+  lessonPlans: [],
   loadingData: true,
   addLesson: async () => {},
   deleteLesson: async () => {},
@@ -16,6 +17,8 @@ const DataContext = createContext({
   deleteMaterial: async () => {},
   addAssignment: async () => {},
   deleteAssignment: async () => {},
+  addLessonPlan: async () => {},
+  deleteLessonPlan: async () => {},
   refreshData: async () => {},
 });
 
@@ -25,6 +28,7 @@ export function DataProvider({ children }) {
   const [classes, setClasses] = useState([]);
   const [materials, setMaterials] = useState([]);
   const [assignments, setAssignments] = useState([]);
+  const [lessonPlans, setLessonPlans] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
 
   const loadUserData = useCallback(async (userId) => {
@@ -33,33 +37,38 @@ export function DataProvider({ children }) {
       setClasses([]);
       setMaterials([]);
       setAssignments([]);
+      setLessonPlans([]);
       setLoadingData(false);
       return;
     }
 
     setLoadingData(true);
     try {
-      const [l, c, m, a] = await Promise.all([
+      const [l, c, m, a, p] = await Promise.all([
         dataService.getLessons(userId),
         dataService.getClasses(userId),
         dataService.getMaterials(userId),
         dataService.getAssignments(userId),
+        dataService.getLessonPlans(userId),
       ]);
       setLessons(l || []);
       setClasses(c || []);
       setMaterials(m || []);
       setAssignments(a || []);
+      setLessonPlans(p || []);
     } catch (err) {
       console.error('Error loading user data:', err);
       setLessons([]);
       setClasses([]);
       setMaterials([]);
       setAssignments([]);
+      setLessonPlans([]);
     } finally {
       setLoadingData(false);
     }
   }, []);
 
+  // When user changes (login, logout, account switch), cleanly load or reset
   useEffect(() => {
     if (user?.id) {
       loadUserData(user.id);
@@ -68,6 +77,7 @@ export function DataProvider({ children }) {
       setClasses([]);
       setMaterials([]);
       setAssignments([]);
+      setLessonPlans([]);
       setLoadingData(false);
     }
   }, [user?.id, loadUserData]);
@@ -76,7 +86,7 @@ export function DataProvider({ children }) {
     if (!user?.id) return;
     const created = await dataService.addLesson(user.id, lessonData);
     if (created) {
-      setLessons(prev => [...prev, created]);
+      setLessons((prev) => [...prev, created]);
     }
     return created;
   };
@@ -85,7 +95,7 @@ export function DataProvider({ children }) {
     if (!user?.id) return;
     const ok = await dataService.deleteLesson(user.id, lessonId);
     if (ok) {
-      setLessons(prev => prev.filter(l => l.id !== lessonId));
+      setLessons((prev) => prev.filter((l) => l.id !== lessonId));
     }
     return ok;
   };
@@ -94,7 +104,7 @@ export function DataProvider({ children }) {
     if (!user?.id) return;
     const created = await dataService.addClass(user.id, classData);
     if (created) {
-      setClasses(prev => [...prev, created]);
+      setClasses((prev) => [...prev, created]);
     }
     return created;
   };
@@ -103,7 +113,7 @@ export function DataProvider({ children }) {
     if (!user?.id) return;
     const ok = await dataService.deleteClass(user.id, classId);
     if (ok) {
-      setClasses(prev => prev.filter(c => c.id !== classId));
+      setClasses((prev) => prev.filter((c) => c.id !== classId));
     }
     return ok;
   };
@@ -112,7 +122,7 @@ export function DataProvider({ children }) {
     if (!user?.id) return;
     const created = await dataService.addMaterial(user.id, matData);
     if (created) {
-      setMaterials(prev => [created, ...prev]);
+      setMaterials((prev) => [created, ...prev]);
     }
     return created;
   };
@@ -121,7 +131,7 @@ export function DataProvider({ children }) {
     if (!user?.id) return;
     const ok = await dataService.deleteMaterial(user.id, materialId);
     if (ok) {
-      setMaterials(prev => prev.filter(m => m.id !== materialId));
+      setMaterials((prev) => prev.filter((m) => m.id !== materialId));
     }
     return ok;
   };
@@ -130,7 +140,7 @@ export function DataProvider({ children }) {
     if (!user?.id) return;
     const created = await dataService.addAssignment(user.id, asgData);
     if (created) {
-      setAssignments(prev => [...prev, created]);
+      setAssignments((prev) => [...prev, created]);
     }
     return created;
   };
@@ -139,7 +149,25 @@ export function DataProvider({ children }) {
     if (!user?.id) return;
     const ok = await dataService.deleteAssignment(user.id, assignmentId);
     if (ok) {
-      setAssignments(prev => prev.filter(a => a.id !== assignmentId));
+      setAssignments((prev) => prev.filter((a) => a.id !== assignmentId));
+    }
+    return ok;
+  };
+
+  const addLessonPlan = async (planData) => {
+    if (!user?.id) return;
+    const created = await dataService.addLessonPlan(user.id, planData);
+    if (created) {
+      setLessonPlans((prev) => [created, ...prev]);
+    }
+    return created;
+  };
+
+  const deleteLessonPlan = async (planId) => {
+    if (!user?.id) return;
+    const ok = await dataService.deleteLessonPlan(user.id, planId);
+    if (ok) {
+      setLessonPlans((prev) => prev.filter((p) => p.id !== planId));
     }
     return ok;
   };
@@ -155,6 +183,7 @@ export function DataProvider({ children }) {
     classes,
     materials,
     assignments,
+    lessonPlans,
     loadingData,
     addLesson,
     deleteLesson,
@@ -164,6 +193,8 @@ export function DataProvider({ children }) {
     deleteMaterial,
     addAssignment,
     deleteAssignment,
+    addLessonPlan,
+    deleteLessonPlan,
     refreshData,
   };
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Mail, Bell, ChevronDown, GraduationCap, LogOut } from 'lucide-react';
+import { ChevronDown, GraduationCap, LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
@@ -84,18 +84,7 @@ export default function Header() {
       </div>
 
       {/* Right controls */}
-      <div className="flex items-center gap-3 sm:gap-5 flex-shrink-0">
-        <button className="hidden sm:flex text-white/80 hover:text-white transition-colors" title="Qidirish">
-          <Search size={17} />
-        </button>
-        <button className="hidden sm:flex text-white/80 hover:text-white transition-colors" title="Xabarlar">
-          <Mail size={17} />
-        </button>
-        <button className="relative text-white/80 hover:text-white transition-colors p-1" title="Bildirishnomalar">
-          <Bell size={17} />
-          <span className="absolute 0.5 top-0.5 right-0.5 w-[6px] h-[6px] rounded-full bg-white" />
-        </button>
-
+      <div className="flex items-center flex-shrink-0">
         {/* Profile dropdown trigger */}
         <div className="relative">
           <button

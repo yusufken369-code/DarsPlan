@@ -50,7 +50,7 @@ export default function Header() {
 
   return (
     <header
-      className="flex items-center justify-between px-3 sm:px-6 h-[60px] flex-shrink-0 relative select-none w-full"
+      className="flex items-center justify-between px-3 sm:px-6 h-[60px] flex-shrink-0 relative select-none w-full z-30 shadow-sm"
       style={{ background: '#ef5b5b' }}
     >
       {/* Left side: Logo + Greeting */}

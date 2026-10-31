@@ -55,7 +55,7 @@ export default function Sidebar() {
     <>
       {/* ── Desktop Sidebar (md+) ── */}
       <aside
-        className="hidden md:flex flex-col items-center w-[66px] flex-shrink-0 py-4 gap-1 select-none"
+        className="hidden md:flex flex-col items-center w-[66px] flex-shrink-0 h-full py-4 gap-1 select-none overflow-hidden"
         style={{ background: 'white', borderRight: '1px solid #f0f3fa' }}
       >
         {/* Nav items */}

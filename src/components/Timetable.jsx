@@ -118,12 +118,54 @@ export default function Timetable() {
     subject: '',
     class_name: '',
     schedule_type: 'weekly', // 'weekly' or 'date'
-    day: 0,
+    pattern: '0', // 'mon_wed_fri', 'tue_thu_sat', or '0'..'6'
+    selectedDays: [0], // array of selected day indices: [0, 2, 4] or [1, 3, 5]
     specific_date: formatToDateString(new Date()),
     start_time: '08:00',
     end_time: '09:15',
     color: 'navy',
   });
+
+  const handlePatternChange = (patternVal) => {
+    if (patternVal === 'mon_wed_fri') {
+      setForm((prev) => ({
+        ...prev,
+        pattern: 'mon_wed_fri',
+        selectedDays: [0, 2, 4], // Du, Chor, Ju
+      }));
+    } else if (patternVal === 'tue_thu_sat') {
+      setForm((prev) => ({
+        ...prev,
+        pattern: 'tue_thu_sat',
+        selectedDays: [1, 3, 5], // Se, Pay, Shan
+      }));
+    } else {
+      const dayNum = Number(patternVal);
+      setForm((prev) => ({
+        ...prev,
+        pattern: patternVal,
+        selectedDays: [dayNum],
+      }));
+    }
+  };
+
+  const toggleDay = (dayIndex) => {
+    setForm((prev) => {
+      const exists = prev.selectedDays.includes(dayIndex);
+      let updated;
+      if (exists) {
+        if (prev.selectedDays.length === 1) return prev;
+        updated = prev.selectedDays.filter((d) => d !== dayIndex);
+      } else {
+        updated = [...prev.selectedDays, dayIndex].sort((a, b) => a - b);
+      }
+      return {
+        ...prev,
+        pattern: 'custom',
+        selectedDays: updated,
+      };
+    });
+  };
 
   // Calculate real calendar dates dynamically for all 7 days of the currently navigated week
   const days = getWeekDates(weekOffset);
@@ -142,22 +184,35 @@ export default function Timetable() {
 
     setSubmitting(true);
 
-    let resolvedDay = Number(form.day);
     if (form.schedule_type === 'date') {
       const parsed = parseLocalDate(form.specific_date);
-      resolvedDay = (parsed.getDay() + 6) % 7;
+      const resolvedDay = (parsed.getDay() + 6) % 7;
+      await addLesson({
+        subject: form.subject.trim(),
+        class_name: form.class_name.trim() || 'A',
+        schedule_type: 'date',
+        day: resolvedDay,
+        specific_date: form.specific_date,
+        start_time: form.start_time,
+        end_time: form.end_time,
+        color: form.color,
+      });
+    } else {
+      // Weekly: add lesson for all selected days (e.g. Du/Chor/Ju or Se/Pay/Shan)
+      const daysToAdd = form.selectedDays && form.selectedDays.length > 0 ? form.selectedDays : [0];
+      for (const d of daysToAdd) {
+        await addLesson({
+          subject: form.subject.trim(),
+          class_name: form.class_name.trim() || 'A',
+          schedule_type: 'weekly',
+          day: Number(d),
+          specific_date: null,
+          start_time: form.start_time,
+          end_time: form.end_time,
+          color: form.color,
+        });
+      }
     }
-
-    await addLesson({
-      subject: form.subject.trim(),
-      class_name: form.class_name.trim() || 'A',
-      schedule_type: form.schedule_type,
-      day: resolvedDay,
-      specific_date: form.schedule_type === 'date' ? form.specific_date : null,
-      start_time: form.start_time,
-      end_time: form.end_time,
-      color: form.color,
-    });
 
     setSubmitting(false);
     setShowModal(false);
@@ -165,7 +220,8 @@ export default function Timetable() {
       subject: '',
       class_name: '',
       schedule_type: 'weekly',
-      day: 0,
+      pattern: '0',
+      selectedDays: [0],
       specific_date: formatToDateString(new Date()),
       start_time: '08:00',
       end_time: '09:15',
@@ -419,21 +475,82 @@ export default function Timetable() {
 
               {/* Conditional: Weekday or Specific Date */}
               {form.schedule_type === 'weekly' ? (
-                <div>
-                  <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
-                    Hafta kuni
-                  </label>
+                <div className="flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-semibold text-[#455a7a]">
+                      Hafta kuni / Dars tartibi
+                    </label>
+                  </div>
+
+                  {/* Dropdown with multi-day patterns and individual weekdays */}
                   <select
-                    value={form.day}
-                    onChange={(e) => setForm({ ...form, day: Number(e.target.value) })}
-                    className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                    value={form.pattern}
+                    onChange={(e) => handlePatternChange(e.target.value)}
+                    className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs font-medium text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
                   >
-                    {WEEKDAYS.map((w) => (
-                      <option key={w.index} value={w.index}>
-                        {w.titleUz}
-                      </option>
-                    ))}
+                    <optgroup label="Guruh darslari (Kombinatsiya)">
+                      <option value="mon_wed_fri">Dushanba / Chorshanba / Juma</option>
+                      <option value="tue_thu_sat">Seshanba / Payshanba / Shanba</option>
+                    </optgroup>
+                    <optgroup label="Alohida kunlar">
+                      {WEEKDAYS.map((w) => (
+                        <option key={w.index} value={String(w.index)}>
+                          {w.titleUz}
+                        </option>
+                      ))}
+                    </optgroup>
+                    {form.pattern === 'custom' && (
+                      <option value="custom">Tanlangan ({form.selectedDays.length} ta kun)</option>
+                    )}
                   </select>
+
+                  {/* Quick selection preset buttons */}
+                  <div className="grid grid-cols-2 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => handlePatternChange('mon_wed_fri')}
+                      className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all border text-center ${
+                        form.pattern === 'mon_wed_fri'
+                          ? 'border-[#3949ab] bg-indigo-50 text-[#3949ab] shadow-sm'
+                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      Du / Chor / Juma
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handlePatternChange('tue_thu_sat')}
+                      className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all border text-center ${
+                        form.pattern === 'tue_thu_sat'
+                          ? 'border-[#3949ab] bg-indigo-50 text-[#3949ab] shadow-sm'
+                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                      }`}
+                    >
+                      Se / Pay / Shanba
+                    </button>
+                  </div>
+
+                  {/* Day pills */}
+                  <div className="flex gap-1 justify-between pt-1 border-t border-gray-100">
+                    {WEEKDAYS.map((w) => {
+                      const active = form.selectedDays.includes(w.index);
+                      return (
+                        <button
+                          key={w.index}
+                          type="button"
+                          onClick={() => toggleDay(w.index)}
+                          title={w.titleUz}
+                          className={`flex-1 py-1 rounded-lg text-[10px] font-bold transition-all ${
+                            active
+                              ? 'bg-[#ef5b5b] text-white shadow-sm'
+                              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                          }`}
+                        >
+                          {w.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               ) : (
                 <div>

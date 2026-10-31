@@ -8,6 +8,7 @@ const DataContext = createContext({
   materials: [],
   assignments: [],
   lessonPlans: [],
+  students: [],
   loadingData: true,
   addLesson: async () => {},
   deleteLesson: async () => {},
@@ -19,6 +20,8 @@ const DataContext = createContext({
   deleteAssignment: async () => {},
   addLessonPlan: async () => {},
   deleteLessonPlan: async () => {},
+  addStudent: async () => {},
+  deleteStudent: async () => {},
   refreshData: async () => {},
 });
 
@@ -29,6 +32,7 @@ export function DataProvider({ children }) {
   const [materials, setMaterials] = useState([]);
   const [assignments, setAssignments] = useState([]);
   const [lessonPlans, setLessonPlans] = useState([]);
+  const [students, setStudents] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
 
   const loadUserData = useCallback(async (userId) => {
@@ -38,24 +42,27 @@ export function DataProvider({ children }) {
       setMaterials([]);
       setAssignments([]);
       setLessonPlans([]);
+      setStudents([]);
       setLoadingData(false);
       return;
     }
 
     setLoadingData(true);
     try {
-      const [l, c, m, a, p] = await Promise.all([
+      const [l, c, m, a, p, s] = await Promise.all([
         dataService.getLessons(userId),
         dataService.getClasses(userId),
         dataService.getMaterials(userId),
         dataService.getAssignments(userId),
         dataService.getLessonPlans(userId),
+        dataService.getStudents(userId),
       ]);
       setLessons(l || []);
       setClasses(c || []);
       setMaterials(m || []);
       setAssignments(a || []);
       setLessonPlans(p || []);
+      setStudents(s || []);
     } catch (err) {
       console.error('Error loading user data:', err);
       setLessons([]);
@@ -63,6 +70,7 @@ export function DataProvider({ children }) {
       setMaterials([]);
       setAssignments([]);
       setLessonPlans([]);
+      setStudents([]);
     } finally {
       setLoadingData(false);
     }
@@ -78,6 +86,7 @@ export function DataProvider({ children }) {
       setMaterials([]);
       setAssignments([]);
       setLessonPlans([]);
+      setStudents([]);
       setLoadingData(false);
     }
   }, [user?.id, loadUserData]);
@@ -172,6 +181,44 @@ export function DataProvider({ children }) {
     return ok;
   };
 
+  const addStudent = async (studentData) => {
+    if (!user?.id) return;
+    const created = await dataService.addStudent(user.id, studentData);
+    if (created) {
+      setStudents((prev) => [...prev, created]);
+      // Update local class count
+      if (studentData.class_id) {
+        setClasses((prev) =>
+          prev.map((c) =>
+            c.id === studentData.class_id
+              ? { ...c, student_count: (c.student_count || 0) + 1 }
+              : c
+          )
+        );
+      }
+    }
+    return created;
+  };
+
+  const deleteStudent = async (studentId) => {
+    if (!user?.id) return;
+    const toDelete = students.find((s) => s.id === studentId);
+    const ok = await dataService.deleteStudent(user.id, studentId);
+    if (ok) {
+      setStudents((prev) => prev.filter((s) => s.id !== studentId));
+      if (toDelete?.class_id) {
+        setClasses((prev) =>
+          prev.map((c) =>
+            c.id === toDelete.class_id
+              ? { ...c, student_count: Math.max((c.student_count || 1) - 1, 0) }
+              : c
+          )
+        );
+      }
+    }
+    return ok;
+  };
+
   const refreshData = () => {
     if (user?.id) {
       return loadUserData(user.id);
@@ -184,6 +231,7 @@ export function DataProvider({ children }) {
     materials,
     assignments,
     lessonPlans,
+    students,
     loadingData,
     addLesson,
     deleteLesson,
@@ -195,6 +243,8 @@ export function DataProvider({ children }) {
     deleteAssignment,
     addLessonPlan,
     deleteLessonPlan,
+    addStudent,
+    deleteStudent,
     refreshData,
   };
 

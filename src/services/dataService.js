@@ -7,6 +7,7 @@ const EMPTY_WORKSPACE = {
   materials: [],
   assignments: [],
   lessonPlans: [],
+  students: [],
 };
 
 // Helper to get user-specific workspace data
@@ -392,6 +393,102 @@ export const dataService = {
     if (!userId || !planId) return false;
     const ws = await getUserWorkspace(userId);
     ws.lessonPlans = (ws.lessonPlans || []).filter((p) => p.id !== planId);
+    await saveUserWorkspace(userId, ws);
+    return true;
+  },
+
+  // ── STUDENTS (O'quvchilar) ──
+  async getStudents(userId, classId = null) {
+    if (!userId) return [];
+    try {
+      let query = supabase
+        .from('students')
+        .select('*')
+        .eq('user_id', userId)
+        .order('name', { ascending: true });
+      if (classId) {
+        query = query.eq('class_id', classId);
+      }
+      const { data, error } = await query;
+      if (!error && Array.isArray(data)) {
+        return data;
+      }
+    } catch {}
+
+    const ws = await getUserWorkspace(userId);
+    const list = ws.students || [];
+    return classId ? list.filter((s) => s.class_id === classId) : list;
+  },
+
+  async addStudent(userId, student) {
+    if (!userId || !student.name) return null;
+    const newStudent = {
+      id: crypto.randomUUID ? crypto.randomUUID() : `std_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      user_id: userId,
+      class_id: student.class_id || '',
+      name: student.name.trim(),
+      phone: student.phone ? student.phone.trim() : '',
+      parent_phone: student.parent_phone ? student.parent_phone.trim() : '',
+      note: student.note ? student.note.trim() : '',
+      created_at: new Date().toISOString(),
+    };
+
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .insert([newStudent])
+        .select()
+        .single();
+      if (!error && data) {
+        return data;
+      }
+    } catch {}
+
+    const ws = await getUserWorkspace(userId);
+    ws.students = [...(ws.students || []), newStudent];
+    // Sync class student count
+    if (student.class_id && ws.classes) {
+      const cls = ws.classes.find((c) => c.id === student.class_id);
+      if (cls) {
+        cls.student_count = ws.students.filter((s) => s.class_id === student.class_id).length;
+      }
+    }
+    await saveUserWorkspace(userId, ws);
+    return newStudent;
+  },
+
+  async deleteStudent(userId, studentId) {
+    if (!userId || !studentId) return false;
+    try {
+      const { error } = await supabase
+        .from('students')
+        .delete()
+        .eq('id', studentId)
+        .eq('user_id', userId);
+      if (!error) {
+        const ws = await getUserWorkspace(userId);
+        const toDelete = (ws.students || []).find((s) => s.id === studentId);
+        ws.students = (ws.students || []).filter((s) => s.id !== studentId);
+        if (toDelete?.class_id && ws.classes) {
+          const cls = ws.classes.find((c) => c.id === toDelete.class_id);
+          if (cls) {
+            cls.student_count = ws.students.filter((s) => s.class_id === toDelete.class_id).length;
+          }
+        }
+        await saveUserWorkspace(userId, ws);
+        return true;
+      }
+    } catch {}
+
+    const ws = await getUserWorkspace(userId);
+    const toDelete = (ws.students || []).find((s) => s.id === studentId);
+    ws.students = (ws.students || []).filter((s) => s.id !== studentId);
+    if (toDelete?.class_id && ws.classes) {
+      const cls = ws.classes.find((c) => c.id === toDelete.class_id);
+      if (cls) {
+        cls.student_count = ws.students.filter((s) => s.class_id === toDelete.class_id).length;
+      }
+    }
     await saveUserWorkspace(userId, ws);
     return true;
   },

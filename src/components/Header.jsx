@@ -50,14 +50,14 @@ export default function Header() {
 
   return (
     <header
-      className="flex items-center justify-between px-3 sm:px-5 h-[58px] flex-shrink-0 relative select-none"
+      className="flex items-center justify-between px-3 sm:px-6 h-[60px] flex-shrink-0 relative select-none w-full"
       style={{ background: '#ef5b5b' }}
     >
       {/* Left side: Logo + Greeting */}
-      <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 mr-2">
+      <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1 mr-2">
         {/* Logo area on desktop */}
-        <div className="hidden sm:flex items-center justify-center w-8 sm:w-[50px] flex-shrink-0">
-          <GraduationCap size={24} className="text-white" />
+        <div className="hidden md:flex items-center justify-center w-[46px] flex-shrink-0">
+          <GraduationCap size={26} className="text-white" />
         </div>
 
         {/* User Avatar */}

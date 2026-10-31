@@ -1,5 +1,17 @@
 import React, { useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Trash2, X, Calendar, Clock } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Trash2,
+  X,
+  Calendar,
+  Clock,
+  Users,
+  UserPlus,
+  School,
+  User,
+} from 'lucide-react';
 import { useData } from '../context/DataContext';
 import {
   WEEKDAYS,
@@ -46,7 +58,7 @@ const COLORS = {
 };
 
 /* ─── Lesson card ───────────────────────────────────────────────── */
-function LessonCard({ lesson, onDelete }) {
+function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
   const c = COLORS[lesson.color] || COLORS.white;
   const startT = lesson.start_time || lesson.start || '08:00';
   const endT = lesson.end_time || lesson.end || '09:00';
@@ -57,7 +69,8 @@ function LessonCard({ lesson, onDelete }) {
 
   return (
     <div
-      className="absolute left-1 right-1 rounded-lg px-2 py-1 overflow-hidden group cursor-pointer transition-transform hover:-translate-y-px"
+      onClick={() => onSelect && onSelect(lesson)}
+      className="absolute left-1 right-1 rounded-lg px-2 py-1 overflow-hidden group cursor-pointer transition-all hover:scale-[1.01] hover:shadow-lg"
       style={{
         top: `${topPx}px`,
         height: `${heightPx}px`,
@@ -65,15 +78,25 @@ function LessonCard({ lesson, onDelete }) {
         border: `1px solid ${c.border}`,
         boxShadow: c.shadow,
       }}
+      title={`Batafsil va o'quvchilar: ${lesson.subject} (${lesson.class_name || 'Guruh'})`}
     >
       <div className="flex items-start justify-between">
-        <div className="min-w-0 flex items-baseline gap-1 leading-tight">
+        <div className="min-w-0 flex items-baseline gap-1 leading-tight flex-wrap">
           <span className="font-bold text-[11px] truncate" style={{ color: c.text }}>
             {lesson.subject}
           </span>
           <span className="text-[10px] font-medium" style={{ color: c.time }}>
             {lesson.class_name || lesson.cls}
           </span>
+          {studentCount > 0 && (
+            <span
+              className="text-[8px] font-bold px-1 rounded bg-black/20 flex items-center gap-0.5"
+              style={{ color: c.text }}
+              title={`${studentCount} nafar o'quvchi`}
+            >
+              👥 {studentCount}
+            </span>
+          )}
           {isOneTime && (
             <span
               className="text-[8px] font-bold px-1 rounded bg-black/15 uppercase tracking-tighter"
@@ -87,7 +110,9 @@ function LessonCard({ lesson, onDelete }) {
         <button
           onClick={(e) => {
             e.stopPropagation();
-            onDelete(lesson.id);
+            if (confirm(`"${lesson.subject}" darsini o'chirmoqchimisiz?`)) {
+              onDelete(lesson.id);
+            }
           }}
           className="opacity-0 group-hover:opacity-100 p-0.5 rounded transition-opacity"
           style={{ color: c.text }}
@@ -108,10 +133,13 @@ function LessonCard({ lesson, onDelete }) {
 
 /* ─── Timetable Component ────────────────────────────────────────── */
 export default function Timetable() {
-  const { lessons, addLesson, deleteLesson } = useData();
+  const { lessons, addLesson, deleteLesson, students, addStudent, deleteStudent } = useData();
   const [weekOffset, setWeekOffset] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedLesson, setSelectedLesson] = useState(null);
+  const [studentForm, setStudentForm] = useState({ name: '', phone: '', parent_phone: '', note: '' });
+  const [submittingStudent, setSubmittingStudent] = useState(false);
 
   // New lesson form state
   const [form, setForm] = useState({
@@ -183,13 +211,14 @@ export default function Timetable() {
     }
 
     setSubmitting(true);
+    let lastCreated = null;
 
     if (form.schedule_type === 'date') {
       const parsed = parseLocalDate(form.specific_date);
       const resolvedDay = (parsed.getDay() + 6) % 7;
-      await addLesson({
+      lastCreated = await addLesson({
         subject: form.subject.trim(),
-        class_name: form.class_name.trim() || 'A',
+        class_name: form.class_name.trim() || '1-guruh',
         schedule_type: 'date',
         day: resolvedDay,
         specific_date: form.specific_date,
@@ -201,9 +230,9 @@ export default function Timetable() {
       // Weekly: add lesson for all selected days (e.g. Du/Chor/Ju or Se/Pay/Shan)
       const daysToAdd = form.selectedDays && form.selectedDays.length > 0 ? form.selectedDays : [0];
       for (const d of daysToAdd) {
-        await addLesson({
+        const created = await addLesson({
           subject: form.subject.trim(),
-          class_name: form.class_name.trim() || 'A',
+          class_name: form.class_name.trim() || '1-guruh',
           schedule_type: 'weekly',
           day: Number(d),
           specific_date: null,
@@ -211,6 +240,7 @@ export default function Timetable() {
           end_time: form.end_time,
           color: form.color,
         });
+        if (created) lastCreated = created;
       }
     }
 
@@ -227,7 +257,40 @@ export default function Timetable() {
       end_time: '09:15',
       color: 'navy',
     });
+
+    // Automatically open group students manager for this newly added lesson/group!
+    if (lastCreated) {
+      setSelectedLesson(lastCreated);
+    }
   };
+
+  const handleAddStudentToLesson = async (e) => {
+    e.preventDefault();
+    if (!studentForm.name.trim() || !selectedLesson) return;
+
+    setSubmittingStudent(true);
+    const grp = selectedLesson.class_name || selectedLesson.cls || '1-guruh';
+    await addStudent({
+      class_id: grp,
+      group_name: grp,
+      name: studentForm.name.trim(),
+      phone: studentForm.phone.trim(),
+      parent_phone: studentForm.parent_phone.trim(),
+      note: studentForm.note.trim(),
+    });
+    setSubmittingStudent(false);
+    setStudentForm({ name: '', phone: '', parent_phone: '', note: '' });
+  };
+
+  const currentGroupStudents = selectedLesson
+    ? (students || []).filter((s) => {
+        const grp = String(selectedLesson.class_name || selectedLesson.cls || '').toLowerCase().trim();
+        return (
+          String(s.class_id || '').toLowerCase().trim() === grp ||
+          String(s.group_name || '').toLowerCase().trim() === grp
+        );
+      })
+    : [];
 
   const isEmpty = (lessons || []).length === 0;
 
@@ -368,9 +431,24 @@ export default function Timetable() {
                   ))}
 
                   {/* Lesson cards on this exact day */}
-                  {dayLessons.map((lesson) => (
-                    <LessonCard key={lesson.id} lesson={lesson} onDelete={deleteLesson} />
-                  ))}
+                  {dayLessons.map((lesson) => {
+                    const grp = String(lesson.class_name || lesson.cls || '').toLowerCase().trim();
+                    const stdCount = (students || []).filter(
+                      (s) =>
+                        String(s.class_id || '').toLowerCase().trim() === grp ||
+                        String(s.group_name || '').toLowerCase().trim() === grp
+                    ).length;
+
+                    return (
+                      <LessonCard
+                        key={lesson.id}
+                        lesson={lesson}
+                        onDelete={deleteLesson}
+                        onSelect={(l) => setSelectedLesson(l)}
+                        studentCount={stdCount}
+                      />
+                    );
+                  })}
                 </div>
               );
             })}
@@ -641,6 +719,188 @@ export default function Timetable() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Guruh o'quvchilari va dars ma'lumotlari modali ── */}
+      {selectedLesson && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-[#f7f9fc]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#3949ab] text-white flex items-center justify-center shadow-sm font-bold text-sm">
+                  <School size={18} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-extrabold text-base text-[#283593]">
+                      {selectedLesson.subject}
+                    </h3>
+                    <span className="px-2 py-0.5 rounded-lg bg-pink-100 text-[#ef5b5b] font-bold text-xs">
+                      {selectedLesson.class_name || selectedLesson.cls || '1-guruh'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-[#90a4ae] mt-0.5">
+                    {selectedLesson.start_time || selectedLesson.start} - {selectedLesson.end_time || selectedLesson.end} · Jami {currentGroupStudents.length} nafar o'quvchi
+                  </p>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setSelectedLesson(null)}
+                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-xl hover:bg-gray-200/50 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto flex flex-col gap-5">
+              {/* Add Student Form */}
+              <div className="bg-[#f0f4ff] border border-indigo-100 rounded-2xl p-4">
+                <h4 className="text-xs font-bold text-[#283593] flex items-center gap-1.5 mb-2.5">
+                  <UserPlus size={15} className="text-[#3949ab]" />
+                  <span>
+                    "{selectedLesson.class_name || selectedLesson.cls || '1-guruh'}" guruhiga o'quvchi qo'shish
+                  </span>
+                </h4>
+
+                <form onSubmit={handleAddStudentToLesson} className="flex flex-col gap-2.5">
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                      O'quvchi F.I.SH. *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="masalan: Aliyev Jasur"
+                      value={studentForm.name}
+                      onChange={(e) => setStudentForm({ ...studentForm, name: e.target.value })}
+                      className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                        Telefon raqami
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder="+998 90 123 45 67"
+                        value={studentForm.phone}
+                        onChange={(e) => setStudentForm({ ...studentForm, phone: e.target.value })}
+                        className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                        Ota-onasi telefoni
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder="+998 90 987 65 43"
+                        value={studentForm.parent_phone}
+                        onChange={(e) =>
+                          setStudentForm({ ...studentForm, parent_phone: e.target.value })
+                        }
+                        className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end mt-1">
+                    <button
+                      type="submit"
+                      disabled={submittingStudent || !studentForm.name.trim()}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#3949ab] text-white text-xs font-bold hover:bg-[#303f9f] transition-colors disabled:opacity-50 shadow-sm"
+                    >
+                      <Plus size={14} />
+                      <span>{submittingStudent ? "Qo'shilmoqda…" : "O'quvchini qo'shish"}</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Students List */}
+              <div>
+                <h4 className="text-xs font-bold text-[#283593] mb-2.5 flex items-center justify-between">
+                  <span>Guruh o'quvchilari ({currentGroupStudents.length})</span>
+                </h4>
+
+                {currentGroupStudents.length === 0 ? (
+                  <div className="p-6 text-center border-2 border-dashed border-gray-100 rounded-2xl bg-[#fafbfe]">
+                    <User size={22} className="mx-auto text-gray-400 mb-1.5" />
+                    <p className="text-xs font-bold text-[#283593]">Ushbu guruhda hali o'quvchilar yo'q</p>
+                    <p className="text-[11px] text-[#90a4ae] mt-0.5">
+                      Yuqoridagi formadan foydalanib birinchi o'quvchini qo'shing.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-2 max-h-[220px] overflow-y-auto pr-1">
+                    {currentGroupStudents.map((std, idx) => (
+                      <div
+                        key={std.id}
+                        className="flex items-center justify-between p-2.5 rounded-xl bg-[#f7f9fc] border border-gray-100 hover:bg-white hover:shadow-sm transition-all group"
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="w-5 h-5 rounded-full bg-white text-[#3949ab] font-bold text-[11px] flex items-center justify-center border border-gray-200 flex-shrink-0">
+                            {idx + 1}
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-xs font-bold text-[#283593] truncate">{std.name}</p>
+                            <div className="flex items-center gap-2.5 text-[10px] text-[#90a4ae] mt-0.5 flex-wrap">
+                              {std.phone && <span>Tel: {std.phone}</span>}
+                              {std.parent_phone && <span>Ota-ona: {std.parent_phone}</span>}
+                            </div>
+                          </div>
+                        </div>
+
+                        <button
+                          onClick={() => {
+                            if (confirm(`"${std.name}"ni ro'yxatdan o'chirmoqchimisiz?`)) {
+                              deleteStudent(std.id);
+                            }
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition-all flex-shrink-0"
+                          title="O'chirish"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+              <button
+                type="button"
+                onClick={() => {
+                  if (confirm(`"${selectedLesson.subject}" darsini jadvaldan o'chirmoqchimisiz?`)) {
+                    deleteLesson(selectedLesson.id);
+                    setSelectedLesson(null);
+                  }
+                }}
+                className="flex items-center gap-1 text-red-500 hover:text-red-600 text-xs font-bold transition-colors"
+              >
+                <Trash2 size={13} />
+                <span>Darsni o'chirish</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedLesson(null)}
+                className="px-4 py-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-[#455a7a] hover:bg-gray-100 transition-colors shadow-sm"
+              >
+                Yopish
+              </button>
+            </div>
           </div>
         </div>
       )}

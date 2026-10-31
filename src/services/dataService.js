@@ -118,6 +118,24 @@ export const dataService = {
 
     const ws = await getUserWorkspace(userId);
     ws.lessons = [...(ws.lessons || []), newLesson];
+
+    // Ensure group/class exists in classes list
+    if (newLesson.class_name && ws.classes) {
+      const exists = ws.classes.some(
+        (c) => c.name.toLowerCase().trim() === newLesson.class_name.toLowerCase().trim()
+      );
+      if (!exists) {
+        ws.classes.push({
+          id: `class_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+          user_id: userId,
+          name: newLesson.class_name.trim(),
+          room: '',
+          student_count: 0,
+          created_at: new Date().toISOString(),
+        });
+      }
+    }
+
     await saveUserWorkspace(userId, ws);
     return newLesson;
   },
@@ -407,7 +425,7 @@ export const dataService = {
         .eq('user_id', userId)
         .order('name', { ascending: true });
       if (classId) {
-        query = query.eq('class_id', classId);
+        query = query.or(`class_id.eq.${classId},group_name.eq.${classId}`);
       }
       const { data, error } = await query;
       if (!error && Array.isArray(data)) {
@@ -417,15 +435,23 @@ export const dataService = {
 
     const ws = await getUserWorkspace(userId);
     const list = ws.students || [];
-    return classId ? list.filter((s) => s.class_id === classId) : list;
+    if (!classId) return list;
+    const target = String(classId).toLowerCase().trim();
+    return list.filter(
+      (s) =>
+        String(s.class_id || '').toLowerCase().trim() === target ||
+        String(s.group_name || '').toLowerCase().trim() === target
+    );
   },
 
   async addStudent(userId, student) {
     if (!userId || !student.name) return null;
+    const groupVal = student.group_name || student.class_name || student.class_id || '';
     const newStudent = {
       id: crypto.randomUUID ? crypto.randomUUID() : `std_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       user_id: userId,
-      class_id: student.class_id || '',
+      class_id: student.class_id || groupVal,
+      group_name: groupVal,
       name: student.name.trim(),
       phone: student.phone ? student.phone.trim() : '',
       parent_phone: student.parent_phone ? student.parent_phone.trim() : '',
@@ -446,11 +472,18 @@ export const dataService = {
 
     const ws = await getUserWorkspace(userId);
     ws.students = [...(ws.students || []), newStudent];
-    // Sync class student count
-    if (student.class_id && ws.classes) {
-      const cls = ws.classes.find((c) => c.id === student.class_id);
+    // Sync class student count if class exists
+    if (ws.classes && groupVal) {
+      const target = groupVal.toLowerCase().trim();
+      const cls = ws.classes.find(
+        (c) => c.id === groupVal || c.name.toLowerCase().trim() === target
+      );
       if (cls) {
-        cls.student_count = ws.students.filter((s) => s.class_id === student.class_id).length;
+        cls.student_count = ws.students.filter(
+          (s) =>
+            s.class_id === cls.id ||
+            String(s.group_name || '').toLowerCase().trim() === target
+        ).length;
       }
     }
     await saveUserWorkspace(userId, ws);

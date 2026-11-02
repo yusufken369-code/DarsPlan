@@ -146,35 +146,29 @@ export default function Timetable() {
     subject: '',
     class_name: '',
     schedule_type: 'weekly', // 'weekly' or 'date'
-    pattern: '0', // 'mon_wed_fri', 'tue_thu_sat', or '0'..'6'
-    selectedDays: [0], // array of selected day indices: [0, 2, 4] or [1, 3, 5]
+    selectedDays: [0, 2, 4], // default: Dushanba / Chorshanba / Juma
     specific_date: formatToDateString(new Date()),
     start_time: '08:00',
     end_time: '09:15',
     color: 'navy',
   });
 
-  const handlePatternChange = (patternVal) => {
-    if (patternVal === 'mon_wed_fri') {
-      setForm((prev) => ({
-        ...prev,
-        pattern: 'mon_wed_fri',
-        selectedDays: [0, 2, 4], // Du, Chor, Ju
-      }));
-    } else if (patternVal === 'tue_thu_sat') {
-      setForm((prev) => ({
-        ...prev,
-        pattern: 'tue_thu_sat',
-        selectedDays: [1, 3, 5], // Se, Pay, Shan
-      }));
-    } else {
-      const dayNum = Number(patternVal);
-      setForm((prev) => ({
-        ...prev,
-        pattern: patternVal,
-        selectedDays: [dayNum],
-      }));
-    }
+  const arraysEqual = (a, b) => a.length === b.length && a.every((v, i) => v === b[i]);
+  const isMonWedFri = arraysEqual(form.selectedDays, [0, 2, 4]);
+  const isTueThuSat = arraysEqual(form.selectedDays, [1, 3, 5]);
+
+  const selectMonWedFri = () => {
+    setForm((prev) => ({
+      ...prev,
+      selectedDays: [0, 2, 4],
+    }));
+  };
+
+  const selectTueThuSat = () => {
+    setForm((prev) => ({
+      ...prev,
+      selectedDays: [1, 3, 5],
+    }));
   };
 
   const toggleDay = (dayIndex) => {
@@ -182,18 +176,22 @@ export default function Timetable() {
       const exists = prev.selectedDays.includes(dayIndex);
       let updated;
       if (exists) {
-        if (prev.selectedDays.length === 1) return prev;
-        updated = prev.selectedDays.filter((d) => d !== dayIndex);
+        if (prev.selectedDays.length === 1) return prev; // kamida bitta kun qolishi kerak
+        updated = prev.selectedDays.filter((d) => d !== dayIndex).sort((a, b) => a - b);
       } else {
         updated = [...prev.selectedDays, dayIndex].sort((a, b) => a - b);
       }
       return {
         ...prev,
-        pattern: 'custom',
         selectedDays: updated,
       };
     });
   };
+
+  const selectedDayNames = form.selectedDays
+    .map((d) => WEEKDAYS[d]?.titleUz)
+    .filter(Boolean)
+    .join(', ');
 
   // Calculate real calendar dates dynamically for all 7 days of the currently navigated week
   const days = getWeekDates(weekOffset);
@@ -250,8 +248,7 @@ export default function Timetable() {
       subject: '',
       class_name: '',
       schedule_type: 'weekly',
-      pattern: '0',
-      selectedDays: [0],
+      selectedDays: [0, 2, 4],
       specific_date: formatToDateString(new Date()),
       start_time: '08:00',
       end_time: '09:15',
@@ -553,81 +550,95 @@ export default function Timetable() {
 
               {/* Conditional: Weekday or Specific Date */}
               {form.schedule_type === 'weekly' ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-2.5">
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-semibold text-[#455a7a]">
-                      Hafta kuni / Dars tartibi
+                      Dars o'tiladigan kunlar
                     </label>
+                    <span className="text-[11px] font-bold text-[#3949ab]">
+                      {form.selectedDays.length} ta kun tanlandi
+                    </span>
                   </div>
 
-                  {/* Dropdown with multi-day patterns and individual weekdays */}
-                  <select
-                    value={form.pattern}
-                    onChange={(e) => handlePatternChange(e.target.value)}
-                    className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs font-medium text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
-                  >
-                    <optgroup label="Guruh darslari (Kombinatsiya)">
-                      <option value="mon_wed_fri">Dushanba / Chorshanba / Juma</option>
-                      <option value="tue_thu_sat">Seshanba / Payshanba / Shanba</option>
-                    </optgroup>
-                    <optgroup label="Alohida kunlar">
-                      {WEEKDAYS.map((w) => (
-                        <option key={w.index} value={String(w.index)}>
-                          {w.titleUz}
-                        </option>
-                      ))}
-                    </optgroup>
-                    {form.pattern === 'custom' && (
-                      <option value="custom">Tanlangan ({form.selectedDays.length} ta kun)</option>
-                    )}
-                  </select>
-
-                  {/* Quick selection preset buttons */}
-                  <div className="grid grid-cols-2 gap-1.5">
+                  {/* 1. Asosiy kombinatsiya tugmalari (Du/Chor/Ju va Se/Pay/Shan) */}
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
-                      onClick={() => handlePatternChange('mon_wed_fri')}
-                      className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all border text-center ${
-                        form.pattern === 'mon_wed_fri'
-                          ? 'border-[#3949ab] bg-indigo-50 text-[#3949ab] shadow-sm'
-                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                      onClick={selectMonWedFri}
+                      className={`h-11 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] ${
+                        isMonWedFri
+                          ? 'border-[#3949ab] bg-[#3949ab] text-white shadow-indigo-100 ring-2 ring-[#3949ab]/20'
+                          : 'border-gray-200 bg-white text-[#283593] hover:bg-indigo-50/50 hover:border-indigo-200'
                       }`}
                     >
-                      Du / Chor / Juma
+                      <span>Du / Chor / Juma</span>
                     </button>
                     <button
                       type="button"
-                      onClick={() => handlePatternChange('tue_thu_sat')}
-                      className={`py-1.5 px-2 rounded-lg text-[11px] font-bold transition-all border text-center ${
-                        form.pattern === 'tue_thu_sat'
-                          ? 'border-[#3949ab] bg-indigo-50 text-[#3949ab] shadow-sm'
-                          : 'border-gray-200 bg-white text-gray-600 hover:bg-gray-50'
+                      onClick={selectTueThuSat}
+                      className={`h-11 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] ${
+                        isTueThuSat
+                          ? 'border-[#3949ab] bg-[#3949ab] text-white shadow-indigo-100 ring-2 ring-[#3949ab]/20'
+                          : 'border-gray-200 bg-white text-[#283593] hover:bg-indigo-50/50 hover:border-indigo-200'
                       }`}
                     >
-                      Se / Pay / Shanba
+                      <span>Se / Pay / Shanba</span>
                     </button>
                   </div>
 
-                  {/* Day pills */}
-                  <div className="flex gap-1 justify-between pt-1 border-t border-gray-100">
-                    {WEEKDAYS.map((w) => {
-                      const active = form.selectedDays.includes(w.index);
-                      return (
-                        <button
-                          key={w.index}
-                          type="button"
-                          onClick={() => toggleDay(w.index)}
-                          title={w.titleUz}
-                          className={`flex-1 py-1 rounded-lg text-[10px] font-bold transition-all ${
-                            active
-                              ? 'bg-[#ef5b5b] text-white shadow-sm'
-                              : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
-                          }`}
-                        >
-                          {w.label}
-                        </button>
-                      );
-                    })}
+                  {/* 2. Alohida har bir hafta kuni tugmalari (Scrollsiz, to'liq knopkalar) */}
+                  <div>
+                    <span className="text-[10px] font-semibold text-[#90a4ae] block mb-1.5">
+                      Yoki alohida kunlarni bosing:
+                    </span>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {WEEKDAYS.slice(0, 4).map((w) => {
+                        const active = form.selectedDays.includes(w.index);
+                        return (
+                          <button
+                            key={w.index}
+                            type="button"
+                            onClick={() => toggleDay(w.index)}
+                            className={`py-2 px-1 rounded-xl text-xs font-bold transition-all border text-center active:scale-95 ${
+                              active
+                                ? 'bg-[#ef5b5b] border-[#ef5b5b] text-white shadow-sm'
+                                : 'bg-[#f7f9fc] border-gray-200 text-[#455a7a] hover:bg-gray-100 hover:text-[#283593]'
+                            }`}
+                          >
+                            {w.titleUz}
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <div className="grid grid-cols-3 gap-1.5 mt-1.5">
+                      {WEEKDAYS.slice(4, 7).map((w) => {
+                        const active = form.selectedDays.includes(w.index);
+                        return (
+                          <button
+                            key={w.index}
+                            type="button"
+                            onClick={() => toggleDay(w.index)}
+                            className={`py-2 px-1 rounded-xl text-xs font-bold transition-all border text-center active:scale-95 ${
+                              active
+                                ? 'bg-[#ef5b5b] border-[#ef5b5b] text-white shadow-sm'
+                                : 'bg-[#f7f9fc] border-gray-200 text-[#455a7a] hover:bg-gray-100 hover:text-[#283593]'
+                            }`}
+                          >
+                            {w.titleUz}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Tanlangan kunlar qisqacha ko'rinishi */}
+                  <div className="p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-100 text-[11px] text-[#283593] flex items-center justify-between">
+                    <span className="font-semibold truncate">
+                      {selectedDayNames || 'Hech qaysi kun tanlanmadi'}
+                    </span>
+                    <span className="text-[10px] bg-white px-2 py-0.5 rounded-md font-bold text-[#3949ab] flex-shrink-0 ml-2">
+                      Haftalik
+                    </span>
                   </div>
                 </div>
               ) : (

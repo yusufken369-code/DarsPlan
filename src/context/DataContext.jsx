@@ -21,6 +21,7 @@ const DataContext = createContext({
   addLessonPlan: async () => {},
   deleteLessonPlan: async () => {},
   addStudent: async () => {},
+  updateStudent: async () => {},
   deleteStudent: async () => {},
   refreshData: async () => {},
 });
@@ -200,6 +201,17 @@ export function DataProvider({ children }) {
     return created;
   };
 
+  const updateStudent = async (studentId, updates) => {
+    if (!user?.id || !studentId) return null;
+    const updated = await dataService.updateStudent(user.id, studentId, updates);
+    if (updated) {
+      setStudents((prev) =>
+        prev.map((s) => (s.id === studentId ? { ...s, ...updated } : s))
+      );
+    }
+    return updated;
+  };
+
   const deleteStudent = async (studentId) => {
     if (!user?.id) return;
     const toDelete = students.find((s) => s.id === studentId);
@@ -244,6 +256,7 @@ export function DataProvider({ children }) {
     addLessonPlan,
     deleteLessonPlan,
     addStudent,
+    updateStudent,
     deleteStudent,
     refreshData,
   };

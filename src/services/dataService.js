@@ -456,6 +456,14 @@ export const dataService = {
       phone: student.phone ? student.phone.trim() : '',
       parent_phone: student.parent_phone ? student.parent_phone.trim() : '',
       note: student.note ? student.note.trim() : '',
+      fee: Number(student.fee || student.daromad) || 0,
+      paid: Boolean(student.paid),
+      grade: student.grade ? Number(student.grade) : null,
+      grades: Array.isArray(student.grades)
+        ? student.grades
+        : student.grade
+        ? [{ id: Date.now().toString(), grade: Number(student.grade), date: new Date().toLocaleDateString('uz-UZ') }]
+        : [],
       created_at: new Date().toISOString(),
     };
 
@@ -488,6 +496,37 @@ export const dataService = {
     }
     await saveUserWorkspace(userId, ws);
     return newStudent;
+  },
+
+  async updateStudent(userId, studentId, updates) {
+    if (!userId || !studentId) return null;
+    try {
+      const { data, error } = await supabase
+        .from('students')
+        .update(updates)
+        .eq('id', studentId)
+        .eq('user_id', userId)
+        .select()
+        .single();
+      if (!error && data) {
+        const ws = await getUserWorkspace(userId);
+        ws.students = (ws.students || []).map((s) => (s.id === studentId ? { ...s, ...data } : s));
+        await saveUserWorkspace(userId, ws);
+        return data;
+      }
+    } catch {}
+
+    const ws = await getUserWorkspace(userId);
+    let updatedStudent = null;
+    ws.students = (ws.students || []).map((s) => {
+      if (s.id === studentId) {
+        updatedStudent = { ...s, ...updates };
+        return updatedStudent;
+      }
+      return s;
+    });
+    await saveUserWorkspace(userId, ws);
+    return updatedStudent;
   },
 
   async deleteStudent(userId, studentId) {

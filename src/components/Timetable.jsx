@@ -11,7 +11,6 @@ import {
   UserPlus,
   School,
   User,
-  DollarSign,
   Award,
   Edit3,
 } from 'lucide-react';
@@ -143,7 +142,7 @@ export default function Timetable() {
   const [submitting, setSubmitting] = useState(false);
   const [selectedLesson, setSelectedLesson] = useState(null);
   const [editingStudent, setEditingStudent] = useState(null);
-  const [studentForm, setStudentForm] = useState({ name: '', phone: '', parent_phone: '', note: '', fee: '' });
+  const [studentForm, setStudentForm] = useState({ name: '', phone: '', parent_phone: '', note: '' });
   const [submittingStudent, setSubmittingStudent] = useState(false);
 
   // New lesson form state
@@ -279,10 +278,9 @@ export default function Timetable() {
       phone: studentForm.phone.trim(),
       parent_phone: studentForm.parent_phone.trim(),
       note: studentForm.note.trim(),
-      fee: Number(studentForm.fee) || 0,
     });
     setSubmittingStudent(false);
-    setStudentForm({ name: '', phone: '', parent_phone: '', note: '', fee: '' });
+    setStudentForm({ name: '', phone: '', parent_phone: '', note: '' });
   };
 
   const currentGroupStudents = selectedLesson
@@ -294,14 +292,6 @@ export default function Timetable() {
         );
       })
     : [];
-
-  const totalGroupIncome = currentGroupStudents.reduce(
-    (sum, s) => sum + (Number(s.fee) || 0),
-    0
-  );
-  const paidGroupIncome = currentGroupStudents
-    .filter((s) => s.paid)
-    .reduce((sum, s) => sum + (Number(s.fee) || 0), 0);
 
   const isEmpty = (lessons || []).length === 0;
 
@@ -766,12 +756,9 @@ export default function Timetable() {
                     <span className="px-2 py-0.5 rounded-lg bg-pink-100 text-[#ef5b5b] font-bold text-xs">
                       {selectedLesson.class_name || selectedLesson.cls || '1-guruh'}
                     </span>
-                    <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-xs border border-emerald-200">
-                      {totalGroupIncome.toLocaleString('uz-UZ')} so'm daromad
-                    </span>
                   </div>
                   <p className="text-xs text-[#90a4ae] mt-0.5">
-                    {selectedLesson.start_time || selectedLesson.start} - {selectedLesson.end_time || selectedLesson.end} · Jami {currentGroupStudents.length} nafar o'quvchi · To'langan: {paidGroupIncome.toLocaleString('uz-UZ')} so'm
+                    {selectedLesson.start_time || selectedLesson.start} - {selectedLesson.end_time || selectedLesson.end} · Jami {currentGroupStudents.length} nafar o'quvchi
                   </p>
                 </div>
               </div>
@@ -810,7 +797,7 @@ export default function Timetable() {
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
                       <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
                         Telefon raqami
@@ -838,21 +825,6 @@ export default function Timetable() {
                         className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
                       />
                     </div>
-
-                    <div>
-                      <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
-                        Oylik to'lov / Daromad
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1000"
-                        placeholder="masalan: 400000"
-                        value={studentForm.fee}
-                        onChange={(e) => setStudentForm({ ...studentForm, fee: e.target.value })}
-                        className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white font-medium"
-                      />
-                    </div>
                   </div>
 
                   <div className="flex justify-end mt-1">
@@ -873,7 +845,7 @@ export default function Timetable() {
                 <h4 className="text-xs font-bold text-[#283593] mb-2.5 flex items-center justify-between">
                   <span>Guruh o'quvchilari ({currentGroupStudents.length})</span>
                   <span className="text-[10px] text-[#90a4ae] font-normal">
-                    Baholash va to'lovni belgilash uchun o'quvchi ustiga bosing
+                    Baholash uchun o'quvchi ustiga bosing
                   </span>
                 </h4>
 
@@ -909,24 +881,6 @@ export default function Timetable() {
                                 >
                                   <span className={`w-2 h-2 rounded-full ${GRADE_CONFIG[std.grade].bg}`} />
                                   Baho: {std.grade}
-                                </span>
-                              )}
-
-                              {/* Daromad / Fee badge */}
-                              {Number(std.fee) > 0 ? (
-                                <span
-                                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 shadow-xs ${
-                                    std.paid
-                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                      : 'bg-amber-50 text-amber-700 border-amber-200'
-                                  }`}
-                                >
-                                  <DollarSign size={10} />
-                                  {Number(std.fee).toLocaleString('uz-UZ')} so'm · {std.paid ? "To'landi" : "To'lanmagan"}
-                                </span>
-                              ) : (
-                                <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
-                                  To'lov kiritilmagan
                                 </span>
                               )}
                             </div>

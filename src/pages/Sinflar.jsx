@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Plus, Trash2, X, School, UserPlus, Phone, User, CheckCircle2, DollarSign, Award, Edit3 } from 'lucide-react';
+import { Users, Plus, Trash2, X, School, UserPlus, Phone, User, CheckCircle2, Award, Edit3 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import StudentEditModal, { GRADE_CONFIG } from '../components/StudentEditModal';
 
@@ -20,7 +20,6 @@ export default function Sinflar() {
     phone: '',
     parent_phone: '',
     note: '',
-    fee: '',
   });
 
   const handleAddClass = async (e) => {
@@ -54,10 +53,9 @@ export default function Sinflar() {
       phone: studentForm.phone.trim(),
       parent_phone: studentForm.parent_phone.trim(),
       note: studentForm.note.trim(),
-      fee: Number(studentForm.fee) || 0,
     });
     setSubmittingStudent(false);
-    setStudentForm({ name: '', phone: '', parent_phone: '', note: '', fee: '' });
+    setStudentForm({ name: '', phone: '', parent_phone: '', note: '' });
   };
 
   const isEmpty = (classes || []).length === 0;
@@ -66,14 +64,6 @@ export default function Sinflar() {
   const activeClassStudents = selectedClass
     ? (students || []).filter((s) => s.class_id === selectedClass.id)
     : [];
-
-  const totalClassIncome = activeClassStudents.reduce(
-    (sum, s) => sum + (Number(s.fee) || 0),
-    0
-  );
-  const paidClassIncome = activeClassStudents
-    .filter((s) => s.paid)
-    .reduce((sum, s) => sum + (Number(s.fee) || 0), 0);
 
   return (
     <div className="flex flex-col gap-4">
@@ -265,17 +255,12 @@ export default function Sinflar() {
                   <School size={18} />
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-extrabold text-base text-[#283593]">
-                      {selectedClass.name}
-                    </h3>
-                    <span className="px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 font-bold text-[11px] border border-emerald-200">
-                      {totalClassIncome.toLocaleString('uz-UZ')} so'm daromad
-                    </span>
-                  </div>
+                  <h3 className="font-extrabold text-base text-[#283593]">
+                    {selectedClass.name}
+                  </h3>
                   <p className="text-xs text-[#90a4ae] mt-0.5">
                     {selectedClass.room ? `${selectedClass.room} · ` : ''}
-                    Jami {activeClassStudents.length} nafar o'quvchi · To'langan: {paidClassIncome.toLocaleString('uz-UZ')} so'm
+                    Jami {activeClassStudents.length} nafar o'quvchi
                   </p>
                 </div>
               </div>
@@ -327,7 +312,7 @@ export default function Sinflar() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
                       <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
                         Ota-onasi telefoni
@@ -339,21 +324,6 @@ export default function Sinflar() {
                         onChange={(e) =>
                           setStudentForm({ ...studentForm, parent_phone: e.target.value })
                         }
-                        className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
-                        Oylik to'lov / Daromad
-                      </label>
-                      <input
-                        type="number"
-                        min="0"
-                        step="1000"
-                        placeholder="masalan: 400000"
-                        value={studentForm.fee}
-                        onChange={(e) => setStudentForm({ ...studentForm, fee: e.target.value })}
                         className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
                       />
                     </div>
@@ -390,7 +360,7 @@ export default function Sinflar() {
                 <h4 className="text-xs font-bold text-[#283593] mb-3 flex items-center justify-between">
                   <span>O'quvchilar ro'yxati ({activeClassStudents.length})</span>
                   <span className="text-[10px] text-[#90a4ae] font-normal">
-                    Baholash va to'lovni belgilash uchun o'quvchi ustiga bosing
+                    Baholash uchun o'quvchi ustiga bosing
                   </span>
                 </h4>
 
@@ -426,24 +396,6 @@ export default function Sinflar() {
                                 >
                                   <span className={`w-2 h-2 rounded-full ${GRADE_CONFIG[std.grade].bg}`} />
                                   Baho: {std.grade}
-                                </span>
-                              )}
-
-                              {/* Daromad / Fee badge */}
-                              {Number(std.fee) > 0 ? (
-                                <span
-                                  className={`px-2 py-0.5 rounded-full text-[10px] font-bold border flex items-center gap-1 shadow-xs ${
-                                    std.paid
-                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                                      : 'bg-amber-50 text-amber-700 border-amber-200'
-                                  }`}
-                                >
-                                  <DollarSign size={10} />
-                                  {Number(std.fee).toLocaleString('uz-UZ')} so'm · {std.paid ? "To'landi" : "To'lanmagan"}
-                                </span>
-                              ) : (
-                                <span className="text-[10px] text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
-                                  To'lov kiritilmagan
                                 </span>
                               )}
                             </div>

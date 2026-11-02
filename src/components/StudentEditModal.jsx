@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, DollarSign, Award, User, Phone, Check, Trash2 } from 'lucide-react';
+import { X, Award, User, Phone, Trash2 } from 'lucide-react';
 
 export const GRADE_CONFIG = {
   2: {
@@ -43,8 +43,6 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
   const [phone, setPhone] = useState(student.phone || '');
   const [parentPhone, setParentPhone] = useState(student.parent_phone || '');
   const [note, setNote] = useState(student.note || '');
-  const [fee, setFee] = useState(student.fee ?? '');
-  const [paid, setPaid] = useState(Boolean(student.paid));
   const [grade, setGrade] = useState(student.grade ? Number(student.grade) : null);
   const [saving, setSaving] = useState(false);
 
@@ -53,8 +51,6 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
     setPhone(student.phone || '');
     setParentPhone(student.parent_phone || '');
     setNote(student.note || '');
-    setFee(student.fee !== undefined && student.fee !== null ? student.fee : '');
-    setPaid(Boolean(student.paid));
     setGrade(student.grade ? Number(student.grade) : null);
   }, [student]);
 
@@ -68,15 +64,11 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
       phone: phone.trim(),
       parent_phone: parentPhone.trim(),
       note: note.trim(),
-      fee: Number(fee) || 0,
-      paid: Boolean(paid),
       grade: grade ? Number(grade) : null,
     });
     setSaving(false);
     onClose();
   };
-
-  const quickAmounts = [300000, 400000, 500000, 600000, 800000];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm p-4">
@@ -92,7 +84,7 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
                 {student.name || "O'quvchi ma'lumotlari"}
               </h3>
               <p className="text-xs text-[#90a4ae]">
-                Daromad va 2-5 baholarni tahrirlash
+                Baholash (2-5) va ma'lumotlarni tahrirlash
               </p>
             </div>
           </div>
@@ -159,71 +151,7 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
             </div>
           </div>
 
-          {/* 2. Daromad / Oylik to'lov */}
-          <div className="bg-[#fbfcff] p-4 rounded-2xl border border-indigo-100/70 flex flex-col gap-3">
-            <label className="text-xs font-bold text-[#283593] flex items-center gap-1.5">
-              <DollarSign size={15} className="text-[#3949ab]" />
-              <span>Oylik to'lov / Daromad (so'mda)</span>
-            </label>
-
-            <div className="flex gap-2">
-              <div className="relative flex-1">
-                <input
-                  type="number"
-                  min="0"
-                  step="1000"
-                  placeholder="masalan: 400000"
-                  value={fee}
-                  onChange={(e) => setFee(e.target.value)}
-                  className="w-full h-10 px-3 pr-12 rounded-xl border border-gray-200 text-xs font-bold text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
-                />
-                <span className="absolute right-3 top-2.5 text-xs font-semibold text-[#90a4ae] pointer-events-none">
-                  so'm
-                </span>
-              </div>
-
-              {/* Paid Status Toggle */}
-              <button
-                type="button"
-                onClick={() => setPaid(!paid)}
-                className={`px-3.5 h-10 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 border ${
-                  paid
-                    ? 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-sm'
-                    : 'bg-gray-100 text-gray-500 border-gray-200 hover:bg-gray-200/70'
-                }`}
-              >
-                <div
-                  className={`w-3.5 h-3.5 rounded-full flex items-center justify-center ${
-                    paid ? 'bg-emerald-600 text-white' : 'bg-gray-300 text-transparent'
-                  }`}
-                >
-                  <Check size={10} strokeWidth={3} />
-                </div>
-                <span>{paid ? "To'landi" : "To'lanmagan"}</span>
-              </button>
-            </div>
-
-            {/* Quick Amount Buttons */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[10px] text-[#90a4ae]">Tezkor tanlash:</span>
-              {quickAmounts.map((amt) => (
-                <button
-                  key={amt}
-                  type="button"
-                  onClick={() => setFee(amt)}
-                  className={`text-[10px] px-2 py-1 rounded-lg border font-medium transition-colors ${
-                    Number(fee) === amt
-                      ? 'bg-indigo-50 border-[#3949ab] text-[#3949ab] font-bold'
-                      : 'bg-white border-gray-200 text-[#455a7a] hover:bg-gray-50'
-                  }`}
-                >
-                  {(amt / 1000).toLocaleString('uz-UZ')}k
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* 3. Student General Info */}
+          {/* 2. Student General Info */}
           <div className="flex flex-col gap-2.5">
             <div>
               <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">

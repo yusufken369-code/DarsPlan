@@ -224,7 +224,7 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
                 <Trash2 size={13} />
                 <span>O'chirish</span>
               </button>
-            ) : <div />}
+            ) : null}
 
             <div className="flex gap-2">
               <button

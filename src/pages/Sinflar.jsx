@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Users, Plus, Trash2, X, School, UserPlus, Phone, User, CheckCircle2, Award, Edit3 } from 'lucide-react';
+import { Users, Plus, Trash2, X, School, UserPlus, User, Award, Edit3 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import StudentEditModal, { GRADE_CONFIG } from '../components/StudentEditModal';
 

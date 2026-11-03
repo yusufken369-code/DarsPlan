@@ -101,28 +101,37 @@ export default function Header() {
           </button>
 
           {open && (
-            <div className="absolute right-0 top-10 bg-white rounded-xl shadow-xl py-1.5 w-52 z-50">
-              <div className="px-4 py-2 border-b border-gray-100">
-                <p className="font-semibold text-[#283593] text-sm truncate">{fullName}</p>
-                <p className="text-xs text-gray-400 truncate">{user?.email || roleTitle}</p>
-              </div>
-              {['Profil', 'Sozlamalar'].map((item) => (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setOpen(false)}
+              />
+              <div className="absolute right-0 top-10 bg-white rounded-xl shadow-xl py-1.5 w-52 z-50 animate-in fade-in zoom-in-95 duration-100 border border-gray-100">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="font-semibold text-[#283593] text-sm truncate">{fullName}</p>
+                  <p className="text-xs text-gray-400 truncate">{user?.email || roleTitle}</p>
+                </div>
+                {['Profil', 'Sozlamalar'].map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => {
+                      setOpen(false);
+                      navigate('/sozlamalar');
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                  >
+                    {item}
+                  </button>
+                ))}
                 <button
-                  key={item}
-                  onClick={() => setOpen(false)}
-                  className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center justify-between transition-colors border-t border-gray-50"
                 >
-                  {item}
+                  <span>Chiqish</span>
+                  <LogOut size={14} />
                 </button>
-              ))}
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center justify-between"
-              >
-                <span>Chiqish</span>
-                <LogOut size={14} />
-              </button>
-            </div>
+              </div>
+            </>
           )}
         </div>
       </div>

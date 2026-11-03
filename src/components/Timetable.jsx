@@ -93,11 +93,12 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
           </span>
           {studentCount > 0 && (
             <span
-              className="text-[8px] font-bold px-1 rounded bg-black/20 flex items-center gap-0.5"
+              className="text-[8px] font-bold px-1 py-0.5 rounded bg-black/20 flex items-center gap-0.5"
               style={{ color: c.text }}
               title={`${studentCount} nafar o'quvchi`}
             >
-              👥 {studentCount}
+              <Users size={9} />
+              <span>{studentCount}</span>
             </span>
           )}
           {isOneTime && (

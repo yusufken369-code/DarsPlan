@@ -37,15 +37,19 @@ function SideIcon({ to, icon: Icon, label, end }) {
           : 'text-[#b0bec5] hover:bg-[#f0f4ff] hover:text-[#3949ab]')
       }
     >
-      <Icon size={19} strokeWidth={isActive => isActive ? 2.2 : 1.8} />
-      {/* Tooltip */}
-      <span
-        className="pointer-events-none absolute left-[calc(100%+8px)] z-50
-          px-2.5 py-1 bg-[#283593] text-white text-[11px] font-medium rounded-lg
-          whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150"
-      >
-        {label}
-      </span>
+      {({ isActive }) => (
+        <>
+          <Icon size={19} strokeWidth={isActive ? 2.2 : 1.8} />
+          {/* Tooltip */}
+          <span
+            className="pointer-events-none absolute left-[calc(100%+8px)] z-50
+              px-2.5 py-1 bg-[#283593] text-white text-[11px] font-medium rounded-lg
+              whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-150 shadow-md"
+          >
+            {label}
+          </span>
+        </>
+      )}
     </NavLink>
   );
 }

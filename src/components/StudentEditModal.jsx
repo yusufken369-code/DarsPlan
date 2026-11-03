@@ -72,18 +72,18 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+      <div className="bg-white dark:bg-[#1e293b] rounded-3xl shadow-2xl w-full max-w-lg max-h-[92vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 border border-transparent dark:border-slate-700">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-[#f7f9fc]">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700/80 bg-[#f7f9fc] dark:bg-slate-900/60">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#3949ab] to-[#5c6bc0] text-white flex items-center justify-center shadow-sm font-bold text-base">
               <User size={18} />
             </div>
             <div>
-              <h3 className="font-extrabold text-base text-[#283593] leading-snug">
+              <h3 className="font-extrabold text-base text-[#283593] dark:text-white leading-snug">
                 {student.name || "O'quvchi ma'lumotlari"}
               </h3>
-              <p className="text-xs text-[#90a4ae]">
+              <p className="text-xs text-[#90a4ae] dark:text-slate-400">
                 Baholash (2-5) va ma'lumotlarni tahrirlash
               </p>
             </div>
@@ -91,7 +91,7 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
 
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1.5 rounded-xl hover:bg-gray-200/50 transition-colors"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 p-1.5 rounded-xl hover:bg-gray-200/50 dark:hover:bg-slate-800 transition-colors"
           >
             <X size={18} />
           </button>
@@ -100,17 +100,17 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
         {/* Body */}
         <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex flex-col gap-5">
           {/* 1. Baholash (2 dan 5 gacha) - NO EMOJIS, pure colors as requested */}
-          <div className="bg-[#fbfcff] p-4 rounded-2xl border border-indigo-100/70">
+          <div className="bg-[#fbfcff] dark:bg-slate-900/50 p-4 rounded-2xl border border-indigo-100/70 dark:border-slate-700/70">
             <div className="flex items-center justify-between mb-2.5">
-              <label className="text-xs font-bold text-[#283593] flex items-center gap-1.5">
-                <Award size={15} className="text-[#3949ab]" />
+              <label className="text-xs font-bold text-[#283593] dark:text-white flex items-center gap-1.5">
+                <Award size={15} className="text-[#3949ab] dark:text-indigo-400" />
                 <span>O'quvchining bahosi (2 dan 5 gacha)</span>
               </label>
               {grade && (
                 <button
                   type="button"
                   onClick={() => setGrade(null)}
-                  className="text-[11px] text-[#90a4ae] hover:text-red-500 transition-colors"
+                  className="text-[11px] text-[#90a4ae] hover:text-red-500 dark:hover:text-red-400 transition-colors"
                 >
                   Bahoni tozalash
                 </button>
@@ -129,13 +129,13 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
                     className={`relative flex flex-col items-center justify-center py-3 px-2 rounded-2xl transition-all font-bold text-center border-2 ${
                       isSelected
                         ? `${cfg.bg} text-white ${cfg.border} shadow-md scale-[1.03]`
-                        : `bg-white text-gray-700 border-gray-200 hover:border-gray-300`
+                        : `bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-200 border-gray-200 dark:border-slate-700 hover:border-gray-300 dark:hover:border-slate-600`
                     }`}
                   >
                     <span className="text-2xl font-black leading-none mb-1">{g}</span>
                     <span
                       className={`text-[10px] font-semibold tracking-tight ${
-                        isSelected ? 'text-white/95' : 'text-[#78909c]'
+                        isSelected ? 'text-white/95' : 'text-[#78909c] dark:text-slate-400'
                       }`}
                     >
                       {cfg.label}
@@ -154,7 +154,7 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
           {/* 2. Student General Info */}
           <div className="flex flex-col gap-2.5">
             <div>
-              <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+              <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                 O'quvchi F.I.SH. *
               </label>
               <input
@@ -162,13 +162,13 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-900"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <div>
-                <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                   Telefon raqami
                 </label>
                 <input
@@ -176,12 +176,12 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
                   placeholder="+998 90 123 45 67"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                  className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-900"
                 />
               </div>
 
               <div>
-                <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                   Ota-onasi telefoni
                 </label>
                 <input
@@ -189,13 +189,13 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
                   placeholder="+998 90 987 65 43"
                   value={parentPhone}
                   onChange={(e) => setParentPhone(e.target.value)}
-                  className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                  className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-900"
                 />
               </div>
             </div>
 
             <div>
-              <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+              <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                 Izoh / Eslatma
               </label>
               <input
@@ -203,13 +203,13 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
                 placeholder="masalan: A'lochi o'quvchi, olimpiadachi"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-900"
               />
             </div>
           </div>
 
           {/* Footer buttons */}
-          <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-slate-800">
             {onDelete ? (
               <button
                 type="button"
@@ -219,7 +219,7 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
                     onClose();
                   }
                 }}
-                className="flex items-center gap-1 text-red-500 hover:text-red-600 text-xs font-semibold px-2 py-1.5 rounded-lg hover:bg-red-50 transition-colors"
+                className="flex items-center gap-1 text-red-500 hover:text-red-600 text-xs font-semibold px-2 py-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
               >
                 <Trash2 size={13} />
                 <span>O'chirish</span>
@@ -230,7 +230,7 @@ export default function StudentEditModal({ student, onClose, onSave, onDelete })
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Bekor qilish
               </button>

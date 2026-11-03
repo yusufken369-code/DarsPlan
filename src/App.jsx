@@ -69,7 +69,7 @@ function PublicOnlyRoute({ children }) {
 /* ── Dashboard shell layout for protected pages ── */
 function DashboardLayout() {
   return (
-    <div className="h-screen w-full flex flex-col overflow-hidden" style={{ background: '#f0f3fa' }}>
+    <div className="h-screen w-full flex flex-col overflow-hidden bg-[#f0f3fa] dark:bg-[#0b1120] text-[#283593] dark:text-slate-100 transition-colors duration-200">
       <Header />
       <div className="flex flex-1 overflow-hidden relative">
         <Sidebar />

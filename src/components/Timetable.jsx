@@ -63,6 +63,7 @@ const COLORS = {
 /* ─── Lesson card ───────────────────────────────────────────────── */
 function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
   const c = COLORS[lesson.color] || COLORS.white;
+  const isWhite = lesson.color === 'white';
   const startT = lesson.start_time || lesson.start || '08:00';
   const endT = lesson.end_time || lesson.end || '09:00';
   const topPx = (toMinutes(startT) / 60) * HOUR_H;
@@ -73,7 +74,9 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
   return (
     <div
       onClick={() => onSelect && onSelect(lesson)}
-      className="absolute left-1 right-1 rounded-lg px-2 py-1 overflow-hidden group cursor-pointer transition-all hover:scale-[1.01] hover:shadow-lg"
+      className={`absolute left-1 right-1 rounded-lg px-2 py-1 overflow-hidden group cursor-pointer transition-all hover:scale-[1.01] hover:shadow-lg ${
+        isWhite ? 'dark:!bg-slate-800 dark:!border-slate-700' : ''
+      }`}
       style={{
         top: `${topPx}px`,
         height: `${heightPx}px`,
@@ -85,10 +88,16 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
     >
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex items-baseline gap-1 leading-tight flex-wrap">
-          <span className="font-bold text-[11px] truncate" style={{ color: c.text }}>
+          <span
+            className={`font-bold text-[11px] truncate ${isWhite ? 'dark:!text-white' : ''}`}
+            style={{ color: c.text }}
+          >
             {lesson.subject}
           </span>
-          <span className="text-[10px] font-medium" style={{ color: c.time }}>
+          <span
+            className={`text-[10px] font-medium ${isWhite ? 'dark:!text-slate-400' : ''}`}
+            style={{ color: c.time }}
+          >
             {lesson.class_name || lesson.cls}
           </span>
           {studentCount > 0 && (
@@ -118,7 +127,9 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
               onDelete(lesson.id);
             }
           }}
-          className="opacity-0 group-hover:opacity-100 p-0.5 rounded transition-opacity"
+          className={`opacity-0 group-hover:opacity-100 p-0.5 rounded transition-opacity ${
+            isWhite ? 'dark:!text-slate-300 dark:hover:!text-red-400' : ''
+          }`}
           style={{ color: c.text }}
           title="O'chirish"
         >
@@ -127,7 +138,10 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
       </div>
 
       {heightPx >= 36 && (
-        <div className="text-[10px] leading-tight mt-0.5" style={{ color: c.time }}>
+        <div
+          className={`text-[10px] leading-tight mt-0.5 ${isWhite ? 'dark:!text-slate-400' : ''}`}
+          style={{ color: c.time }}
+        >
           {startT} · {endT}
         </div>
       )}
@@ -302,17 +316,17 @@ export default function Timetable() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
         <div className="flex items-center gap-2 flex-wrap">
           {/* Week navigation buttons */}
-          <div className="flex items-center gap-1 bg-white rounded-full p-0.5 shadow-sm border border-gray-100 flex-shrink-0">
+          <div className="flex items-center gap-1 bg-white dark:bg-slate-800 rounded-full p-0.5 shadow-sm border border-gray-100 dark:border-slate-700 flex-shrink-0">
             <button
               onClick={() => setWeekOffset((prev) => prev - 1)}
-              className="w-7 h-7 flex items-center justify-center rounded-full text-[#3949ab] hover:bg-indigo-50 transition-colors"
+              className="w-7 h-7 flex items-center justify-center rounded-full text-[#3949ab] dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-700 transition-colors"
               title="Oldingi hafta"
             >
               <ChevronLeft size={15} />
             </button>
             <button
               onClick={() => setWeekOffset((prev) => prev + 1)}
-              className="w-7 h-7 flex items-center justify-center rounded-full text-[#3949ab] hover:bg-indigo-50 transition-colors"
+              className="w-7 h-7 flex items-center justify-center rounded-full text-[#3949ab] dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-700 transition-colors"
               title="Keyingi hafta"
             >
               <ChevronRight size={15} />
@@ -323,18 +337,18 @@ export default function Timetable() {
           {weekOffset !== 0 ? (
             <button
               onClick={() => setWeekOffset(0)}
-              className="px-2.5 py-1 rounded-lg bg-indigo-50 text-[#3949ab] text-[11px] font-bold hover:bg-indigo-100 transition-colors flex-shrink-0"
+              className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950 text-[#3949ab] dark:text-indigo-300 text-[11px] font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900 transition-colors flex-shrink-0"
             >
               Joriy hafta
             </button>
           ) : (
-            <span className="text-[11px] font-semibold text-[#3949ab] bg-blue-50/70 px-2.5 py-1 rounded-lg flex-shrink-0">
+            <span className="text-[11px] font-semibold text-[#3949ab] dark:text-indigo-300 bg-blue-50/70 dark:bg-indigo-950/60 px-2.5 py-1 rounded-lg flex-shrink-0">
               Joriy hafta
             </span>
           )}
 
           {/* Week Range Label */}
-          <span className="text-[11px] sm:text-xs font-semibold text-[#455a7a] whitespace-nowrap">
+          <span className="text-[11px] sm:text-xs font-semibold text-[#455a7a] dark:text-slate-300 whitespace-nowrap">
             {weekLabel}
           </span>
         </div>
@@ -362,18 +376,20 @@ export default function Timetable() {
                   <div
                     key={day.dayIndex}
                     className={`flex-1 text-center px-0.5 py-1 rounded-lg transition-colors ${
-                      isToday ? 'bg-[#ef5b5b]/10' : ''
+                      isToday ? 'bg-[#ef5b5b]/10 dark:bg-[#ef5b5b]/20' : ''
                     }`}
                   >
                     <div
-                      className="text-[9px] font-semibold tracking-widest uppercase"
-                      style={{ color: isToday ? '#ef5b5b' : '#90a4ae' }}
+                      className={`text-[9px] font-semibold tracking-widest uppercase ${
+                        isToday ? 'text-[#ef5b5b]' : 'text-[#90a4ae] dark:text-slate-400'
+                      }`}
                     >
                       {day.label}
                     </div>
                     <div
-                      className="text-sm font-bold flex items-center justify-center gap-1"
-                      style={{ color: isToday ? '#ef5b5b' : '#283593' }}
+                      className={`text-sm font-bold flex items-center justify-center gap-1 ${
+                        isToday ? 'text-[#ef5b5b]' : 'text-[#283593] dark:text-slate-100'
+                      }`}
                     >
                       <span>{day.date}</span>
                       {isToday && (
@@ -396,7 +412,7 @@ export default function Timetable() {
                   className="absolute right-2 text-right"
                   style={{ top: `${i * HOUR_H - 7}px` }}
                 >
-                  <span className="text-[10px] font-medium text-[#b0bec5]">{h}</span>
+                  <span className="text-[10px] font-medium text-[#b0bec5] dark:text-slate-500">{h}</span>
                 </div>
               ))}
             </div>
@@ -416,19 +432,18 @@ export default function Timetable() {
               return (
                 <div
                   key={day.dayIndex}
-                  className="flex-1 relative"
+                  className="flex-1 relative border-l border-[#e8edf6] dark:border-slate-800"
                   style={{
                     height: `${gridH}px`,
                     background: isToday ? 'rgba(239, 91, 91, 0.04)' : 'transparent',
-                    borderLeft: '1px solid #e8edf6',
                   }}
                 >
                   {/* Hour grid lines */}
                   {HOURS.map((_, i) => (
                     <div
                       key={i}
-                      className="absolute left-0 right-0"
-                      style={{ top: `${i * HOUR_H}px`, borderTop: '1px solid #edf0f7' }}
+                      className="absolute left-0 right-0 border-t border-[#edf0f7] dark:border-slate-800/80"
+                      style={{ top: `${i * HOUR_H}px` }}
                     />
                   ))}
 
@@ -459,13 +474,13 @@ export default function Timetable() {
 
         {/* ── Empty state overlay when no lessons ── */}
         {isEmpty && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 backdrop-blur-[1px] rounded-xl pointer-events-auto">
-            <div className="p-5 rounded-2xl bg-white shadow-lg border border-gray-100 flex flex-col items-center gap-2 max-w-xs text-center mx-4">
-              <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-[#3949ab]">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/40 dark:bg-slate-900/60 backdrop-blur-[1px] rounded-xl pointer-events-auto">
+            <div className="p-5 rounded-2xl bg-white dark:bg-[#1e293b] shadow-lg border border-gray-100 dark:border-slate-700/80 flex flex-col items-center gap-2 max-w-xs text-center mx-4">
+              <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/60 flex items-center justify-center text-[#3949ab] dark:text-indigo-400">
                 <Calendar size={20} />
               </div>
-              <h3 className="font-bold text-sm text-[#283593]">Hozircha darslar yo'q</h3>
-              <p className="text-xs text-[#90a4ae] leading-relaxed">
+              <h3 className="font-bold text-sm text-[#283593] dark:text-white">Hozircha darslar yo'q</h3>
+              <p className="text-xs text-[#90a4ae] dark:text-slate-400 leading-relaxed">
                 Haftalik jadvalingizni tuzish uchun darslaringizni kiriting.
               </p>
               <button
@@ -482,13 +497,13 @@ export default function Timetable() {
 
       {/* ── Add Lesson Modal ── */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h3 className="font-bold text-base text-[#283593]">Yangi dars qo'shish</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-xs p-4">
+          <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-2xl p-6 w-full max-w-sm flex flex-col gap-4 border border-transparent dark:border-slate-700">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700/80 pb-3">
+              <h3 className="font-bold text-base text-[#283593] dark:text-white">Yangi dars qo'shish</h3>
               <button
                 onClick={() => setShowModal(false)}
-                className="text-gray-400 hover:text-gray-600"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200"
               >
                 <X size={18} />
               </button>
@@ -496,7 +511,7 @@ export default function Timetable() {
 
             <form onSubmit={handleAdd} className="flex flex-col gap-3">
               <div>
-                <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                   Fan nomi
                 </label>
                 <input
@@ -505,12 +520,12 @@ export default function Timetable() {
                   placeholder="masalan: Matematika"
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                  className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                   Sinf / Guruh
                 </label>
                 <input
@@ -518,13 +533,13 @@ export default function Timetable() {
                   placeholder="masalan: 9-A yoki S"
                   value={form.class_name}
                   onChange={(e) => setForm({ ...form, class_name: e.target.value })}
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                  className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                 />
               </div>
 
               {/* Schedule Type Selection */}
               <div>
-                <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                   Dars turi
                 </label>
                 <div className="flex gap-2">
@@ -534,7 +549,7 @@ export default function Timetable() {
                     className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all border ${
                       form.schedule_type === 'weekly'
                         ? 'border-[#3949ab] bg-[#3949ab] text-white shadow-sm'
-                        : 'border-gray-200 bg-[#f7f9fc] text-gray-600'
+                        : 'border-gray-200 dark:border-slate-700 bg-[#f7f9fc] dark:bg-slate-800 text-gray-600 dark:text-slate-300'
                     }`}
                   >
                     Har hafta (Doimiy)
@@ -545,7 +560,7 @@ export default function Timetable() {
                     className={`flex-1 py-1.5 px-2 rounded-lg text-xs font-bold transition-all border ${
                       form.schedule_type === 'date'
                         ? 'border-[#3949ab] bg-[#3949ab] text-white shadow-sm'
-                        : 'border-gray-200 bg-[#f7f9fc] text-gray-600'
+                        : 'border-gray-200 dark:border-slate-700 bg-[#f7f9fc] dark:bg-slate-800 text-gray-600 dark:text-slate-300'
                     }`}
                   >
                     Aniq sana uchun
@@ -557,10 +572,10 @@ export default function Timetable() {
               {form.schedule_type === 'weekly' ? (
                 <div className="flex flex-col gap-2.5">
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-semibold text-[#455a7a]">
+                    <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300">
                       Dars o'tiladigan kunlar
                     </label>
-                    <span className="text-[11px] font-bold text-[#3949ab]">
+                    <span className="text-[11px] font-bold text-[#3949ab] dark:text-indigo-400">
                       {form.selectedDays.length} ta kun tanlandi
                     </span>
                   </div>
@@ -573,7 +588,7 @@ export default function Timetable() {
                       className={`h-11 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] ${
                         isMonWedFri
                           ? 'border-[#3949ab] bg-[#3949ab] text-white shadow-indigo-100 ring-2 ring-[#3949ab]/20'
-                          : 'border-gray-200 bg-white text-[#283593] hover:bg-indigo-50/50 hover:border-indigo-200'
+                          : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[#283593] dark:text-slate-200 hover:bg-indigo-50/50 dark:hover:bg-slate-700'
                       }`}
                     >
                       <span>Du / Chor / Juma</span>
@@ -584,7 +599,7 @@ export default function Timetable() {
                       className={`h-11 px-3 rounded-xl text-xs font-bold transition-all border flex items-center justify-center gap-1.5 shadow-sm active:scale-[0.98] ${
                         isTueThuSat
                           ? 'border-[#3949ab] bg-[#3949ab] text-white shadow-indigo-100 ring-2 ring-[#3949ab]/20'
-                          : 'border-gray-200 bg-white text-[#283593] hover:bg-indigo-50/50 hover:border-indigo-200'
+                          : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-[#283593] dark:text-slate-200 hover:bg-indigo-50/50 dark:hover:bg-slate-700'
                       }`}
                     >
                       <span>Se / Pay / Shanba</span>
@@ -593,7 +608,7 @@ export default function Timetable() {
 
                   {/* 2. Alohida har bir hafta kuni tugmalari (Scrollsiz, to'liq knopkalar) */}
                   <div>
-                    <span className="text-[10px] font-semibold text-[#90a4ae] block mb-1.5">
+                    <span className="text-[10px] font-semibold text-[#90a4ae] dark:text-slate-400 block mb-1.5">
                       Yoki alohida kunlarni bosing:
                     </span>
                     <div className="grid grid-cols-4 gap-1.5">
@@ -607,7 +622,7 @@ export default function Timetable() {
                             className={`py-2 px-1 rounded-xl text-xs font-bold transition-all border text-center active:scale-95 ${
                               active
                                 ? 'bg-[#ef5b5b] border-[#ef5b5b] text-white shadow-sm'
-                                : 'bg-[#f7f9fc] border-gray-200 text-[#455a7a] hover:bg-gray-100 hover:text-[#283593]'
+                                : 'bg-[#f7f9fc] dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-[#455a7a] dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-[#283593] dark:hover:text-white'
                             }`}
                           >
                             {w.titleUz}
@@ -626,7 +641,7 @@ export default function Timetable() {
                             className={`py-2 px-1 rounded-xl text-xs font-bold transition-all border text-center active:scale-95 ${
                               active
                                 ? 'bg-[#ef5b5b] border-[#ef5b5b] text-white shadow-sm'
-                                : 'bg-[#f7f9fc] border-gray-200 text-[#455a7a] hover:bg-gray-100 hover:text-[#283593]'
+                                : 'bg-[#f7f9fc] dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-[#455a7a] dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 hover:text-[#283593] dark:hover:text-white'
                             }`}
                           >
                             {w.titleUz}
@@ -637,18 +652,18 @@ export default function Timetable() {
                   </div>
 
                   {/* Tanlangan kunlar qisqacha ko'rinishi */}
-                  <div className="p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-100 text-[11px] text-[#283593] flex items-center justify-between">
+                  <div className="p-2.5 rounded-xl bg-indigo-50/80 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/60 text-[11px] text-[#283593] dark:text-indigo-200 flex items-center justify-between">
                     <span className="font-semibold truncate">
                       {selectedDayNames || 'Hech qaysi kun tanlanmadi'}
                     </span>
-                    <span className="text-[10px] bg-white px-2 py-0.5 rounded-md font-bold text-[#3949ab] flex-shrink-0 ml-2">
+                    <span className="text-[10px] bg-white dark:bg-slate-800 px-2 py-0.5 rounded-md font-bold text-[#3949ab] dark:text-indigo-400 flex-shrink-0 ml-2">
                       Haftalik
                     </span>
                   </div>
                 </div>
               ) : (
                 <div>
-                  <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
+                  <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                     Dars sanasi
                   </label>
                   <input
@@ -656,10 +671,10 @@ export default function Timetable() {
                     required
                     value={form.specific_date}
                     onChange={(e) => setForm({ ...form, specific_date: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                    className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                   />
                   {form.specific_date && (
-                    <span className="text-[11px] text-[#3949ab] font-medium mt-1 block">
+                    <span className="text-[11px] text-[#3949ab] dark:text-indigo-400 font-medium mt-1 block">
                       Hafta kuni: {WEEKDAYS[(parseLocalDate(form.specific_date).getDay() + 6) % 7].titleUz}
                     </span>
                   )}
@@ -668,7 +683,7 @@ export default function Timetable() {
 
               <div className="grid grid-cols-2 gap-2">
                 <div>
-                  <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
+                  <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                     Boshlanish
                   </label>
                   <input
@@ -676,11 +691,11 @@ export default function Timetable() {
                     required
                     value={form.start_time}
                     onChange={(e) => setForm({ ...form, start_time: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                    className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
+                  <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                     Tugash
                   </label>
                   <input
@@ -688,13 +703,13 @@ export default function Timetable() {
                     required
                     value={form.end_time}
                     onChange={(e) => setForm({ ...form, end_time: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                    className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                   Karta rangi
                 </label>
                 <div className="flex gap-2">
@@ -709,8 +724,8 @@ export default function Timetable() {
                       onClick={() => setForm({ ...form, color: c.val })}
                       className={`flex-1 py-1.5 rounded-lg text-xs font-medium border ${
                         form.color === c.val ? 'ring-2 ring-offset-1 ring-[#3949ab]' : ''
-                      } ${c.val === 'white' ? 'text-gray-700 border-gray-300' : 'text-white'}`}
-                      style={{ background: c.bg }}
+                      } ${c.val === 'white' ? 'text-gray-700 dark:text-slate-200 border-gray-300 dark:border-slate-600 dark:bg-slate-800' : 'text-white'}`}
+                      style={{ background: c.val === 'white' ? undefined : c.bg }}
                     >
                       {c.label}
                     </button>
@@ -722,7 +737,7 @@ export default function Timetable() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 h-10 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+                  className="flex-1 h-10 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
                 >
                   Bekor qilish
                 </button>
@@ -742,23 +757,23 @@ export default function Timetable() {
       {/* ── Guruh o'quvchilari va dars ma'lumotlari modali ── */}
       {selectedLesson && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+          <div className="bg-white dark:bg-[#1e293b] rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 border border-transparent dark:border-slate-700">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-[#f7f9fc]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700/80 bg-[#f7f9fc] dark:bg-slate-900/60">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#3949ab] text-white flex items-center justify-center shadow-sm font-bold text-sm">
                   <School size={18} />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h3 className="font-extrabold text-base text-[#283593]">
+                    <h3 className="font-extrabold text-base text-[#283593] dark:text-white">
                       {selectedLesson.subject}
                     </h3>
-                    <span className="px-2 py-0.5 rounded-lg bg-pink-100 text-[#ef5b5b] font-bold text-xs">
+                    <span className="px-2 py-0.5 rounded-lg bg-pink-100 dark:bg-pink-950/60 text-[#ef5b5b] font-bold text-xs">
                       {selectedLesson.class_name || selectedLesson.cls || '1-guruh'}
                     </span>
                   </div>
-                  <p className="text-xs text-[#90a4ae] mt-0.5">
+                  <p className="text-xs text-[#90a4ae] dark:text-slate-400 mt-0.5">
                     {selectedLesson.start_time || selectedLesson.start} - {selectedLesson.end_time || selectedLesson.end} · Jami {currentGroupStudents.length} nafar o'quvchi
                   </p>
                 </div>
@@ -766,7 +781,7 @@ export default function Timetable() {
 
               <button
                 onClick={() => setSelectedLesson(null)}
-                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-xl hover:bg-gray-200/50 transition-colors"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-slate-200 p-1.5 rounded-xl hover:bg-gray-200/50 dark:hover:bg-slate-800 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -775,9 +790,9 @@ export default function Timetable() {
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto flex flex-col gap-5">
               {/* Add Student Form */}
-              <div className="bg-[#f0f4ff] border border-indigo-100 rounded-2xl p-4">
-                <h4 className="text-xs font-bold text-[#283593] flex items-center gap-1.5 mb-2.5">
-                  <UserPlus size={15} className="text-[#3949ab]" />
+              <div className="bg-[#f0f4ff] dark:bg-slate-900/60 border border-indigo-100 dark:border-slate-700 rounded-2xl p-4">
+                <h4 className="text-xs font-bold text-[#283593] dark:text-white flex items-center gap-1.5 mb-2.5">
+                  <UserPlus size={15} className="text-[#3949ab] dark:text-indigo-400" />
                   <span>
                     "{selectedLesson.class_name || selectedLesson.cls || '1-guruh'}" guruhiga o'quvchi qo'shish
                   </span>
@@ -785,7 +800,7 @@ export default function Timetable() {
 
                 <form onSubmit={handleAddStudentToLesson} className="flex flex-col gap-2.5">
                   <div>
-                    <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                    <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                       O'quvchi F.I.SH. *
                     </label>
                     <input
@@ -794,13 +809,13 @@ export default function Timetable() {
                       placeholder="masalan: Aliyev Jasur"
                       value={studentForm.name}
                       onChange={(e) => setStudentForm({ ...studentForm, name: e.target.value })}
-                      className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                      className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-800"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     <div>
-                      <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                      <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                         Telefon raqami
                       </label>
                       <input
@@ -808,12 +823,12 @@ export default function Timetable() {
                         placeholder="+998 90 123 45 67"
                         value={studentForm.phone}
                         onChange={(e) => setStudentForm({ ...studentForm, phone: e.target.value })}
-                        className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                        className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-800"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                      <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                         Ota-onasi telefoni
                       </label>
                       <input
@@ -823,7 +838,7 @@ export default function Timetable() {
                         onChange={(e) =>
                           setStudentForm({ ...studentForm, parent_phone: e.target.value })
                         }
-                        className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                        className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-800"
                       />
                     </div>
                   </div>
@@ -843,18 +858,18 @@ export default function Timetable() {
 
               {/* Students List */}
               <div>
-                <h4 className="text-xs font-bold text-[#283593] mb-2.5 flex items-center justify-between">
+                <h4 className="text-xs font-bold text-[#283593] dark:text-white mb-2.5 flex items-center justify-between">
                   <span>Guruh o'quvchilari ({currentGroupStudents.length})</span>
-                  <span className="text-[10px] text-[#90a4ae] font-normal">
+                  <span className="text-[10px] text-[#90a4ae] dark:text-slate-400 font-normal">
                     Baholash uchun o'quvchi ustiga bosing
                   </span>
                 </h4>
 
                 {currentGroupStudents.length === 0 ? (
-                  <div className="p-6 text-center border-2 border-dashed border-gray-100 rounded-2xl bg-[#fafbfe]">
+                  <div className="p-6 text-center border-2 border-dashed border-gray-100 dark:border-slate-800 rounded-2xl bg-[#fafbfe] dark:bg-slate-900/40">
                     <User size={22} className="mx-auto text-gray-400 mb-1.5" />
-                    <p className="text-xs font-bold text-[#283593]">Ushbu guruhda hali o'quvchilar yo'q</p>
-                    <p className="text-[11px] text-[#90a4ae] mt-0.5">
+                    <p className="text-xs font-bold text-[#283593] dark:text-white">Ushbu guruhda hali o'quvchilar yo'q</p>
+                    <p className="text-[11px] text-[#90a4ae] dark:text-slate-400 mt-0.5">
                       Yuqoridagi formadan foydalanib birinchi o'quvchini qo'shing.
                     </p>
                   </div>
@@ -864,15 +879,15 @@ export default function Timetable() {
                       <div
                         key={std.id}
                         onClick={() => setEditingStudent(std)}
-                        className="flex items-center justify-between p-2.5 rounded-2xl bg-[#f7f9fc] border border-gray-100 hover:bg-white hover:border-indigo-200 hover:shadow-md transition-all cursor-pointer group"
+                        className="flex items-center justify-between p-2.5 rounded-2xl bg-[#f7f9fc] dark:bg-slate-800/60 border border-gray-100 dark:border-slate-700/80 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-200 dark:hover:border-slate-600 hover:shadow-md transition-all cursor-pointer group"
                       >
                         <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                          <span className="w-6 h-6 rounded-full bg-white text-[#3949ab] font-bold text-[11px] flex items-center justify-center border border-gray-200 flex-shrink-0 shadow-xs">
+                          <span className="w-6 h-6 rounded-full bg-white dark:bg-slate-700 text-[#3949ab] dark:text-indigo-300 font-bold text-[11px] flex items-center justify-center border border-gray-200 dark:border-slate-600 flex-shrink-0 shadow-xs">
                             {idx + 1}
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-xs font-bold text-[#283593] truncate">{std.name}</p>
+                              <p className="text-xs font-bold text-[#283593] dark:text-white truncate">{std.name}</p>
 
                               {/* Grade badge (2..5) - Exact color styling, no emoji */}
                               {std.grade && GRADE_CONFIG[std.grade] && (
@@ -886,11 +901,11 @@ export default function Timetable() {
                               )}
                             </div>
 
-                            <div className="flex items-center gap-2.5 text-[10px] text-[#90a4ae] mt-0.5 flex-wrap">
+                            <div className="flex items-center gap-2.5 text-[10px] text-[#90a4ae] dark:text-slate-400 mt-0.5 flex-wrap">
                               {std.phone && <span>Tel: {std.phone}</span>}
                               {std.parent_phone && <span>Ota-ona: {std.parent_phone}</span>}
                               {std.note && (
-                                <span className="bg-indigo-50 text-[#3949ab] px-1.5 py-0.2 rounded font-medium">
+                                <span className="bg-indigo-50 dark:bg-indigo-950/70 text-[#3949ab] dark:text-indigo-300 px-1.5 py-0.2 rounded font-medium">
                                   {std.note}
                                 </span>
                               )}
@@ -905,7 +920,7 @@ export default function Timetable() {
                               e.stopPropagation();
                               setEditingStudent(std);
                             }}
-                            className="text-[#3949ab] hover:text-[#283593] p-1 rounded-lg hover:bg-indigo-50 transition-colors"
+                            className="text-[#3949ab] dark:text-indigo-400 hover:text-[#283593] p-1 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 transition-colors"
                             title="Tahrirlash / Baholash"
                           >
                             <Edit3 size={13} />
@@ -918,7 +933,7 @@ export default function Timetable() {
                                 deleteStudent(std.id);
                               }
                             }}
-                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 transition-all flex-shrink-0"
+                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30 transition-all flex-shrink-0"
                             title="O'chirish"
                           >
                             <Trash2 size={13} />
@@ -932,7 +947,7 @@ export default function Timetable() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-3 border-t border-gray-100 flex items-center justify-between bg-gray-50">
+            <div className="px-6 py-3 border-t border-gray-100 dark:border-slate-700/80 flex items-center justify-between bg-gray-50 dark:bg-slate-900/60">
               <button
                 type="button"
                 onClick={() => {
@@ -950,7 +965,7 @@ export default function Timetable() {
               <button
                 type="button"
                 onClick={() => setSelectedLesson(null)}
-                className="px-4 py-1.5 rounded-xl bg-white border border-gray-200 text-xs font-bold text-[#455a7a] hover:bg-gray-100 transition-colors shadow-sm"
+                className="px-4 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-bold text-[#455a7a] dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors shadow-sm"
               >
                 Yopish
               </button>

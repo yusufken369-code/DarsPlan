@@ -37,10 +37,10 @@ export default function DarsMateriallari() {
   const isEmpty = (materials || []).length === 0;
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm flex flex-col gap-2.5 h-full relative">
+    <div className="bg-white dark:bg-[#151f32] rounded-2xl p-4 shadow-sm flex flex-col gap-2.5 h-full relative border border-transparent dark:border-slate-800 transition-colors duration-200">
       {/* Header */}
       <div className="flex items-center justify-between mb-0.5">
-        <h2 className="text-[#283593] font-bold text-[15px]">Dars materiallari</h2>
+        <h2 className="text-[#283593] dark:text-white font-bold text-[15px]">Dars materiallari</h2>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowModal(true)}
@@ -54,12 +54,12 @@ export default function DarsMateriallari() {
 
       {/* Empty State */}
       {isEmpty ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-gray-100 rounded-xl my-2">
-          <div className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center text-[#ef5b5b] mb-2">
+        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center border-2 border-dashed border-gray-100 dark:border-slate-800 rounded-xl my-2">
+          <div className="w-10 h-10 rounded-full bg-pink-50 dark:bg-pink-950/40 flex items-center justify-center text-[#ef5b5b] mb-2">
             <FolderOpen size={18} />
           </div>
-          <p className="text-xs font-bold text-[#283593]">Hozircha materiallar yo'q</p>
-          <p className="text-[11px] text-[#90a4ae] mt-0.5 mb-3">
+          <p className="text-xs font-bold text-[#283593] dark:text-white">Hozircha materiallar yo'q</p>
+          <p className="text-[11px] text-[#90a4ae] dark:text-slate-400 mt-0.5 mb-3">
             Dars taqdimotlari yoki qo'llanmalarni kiriting.
           </p>
           <button
@@ -76,8 +76,7 @@ export default function DarsMateriallari() {
           {materials.map((m) => (
             <div
               key={m.id}
-              className="flex items-center gap-3 rounded-xl px-3 py-2.5 group hover:opacity-90 transition-opacity"
-              style={{ background: '#fdf1f1' }}
+              className="flex items-center gap-3 rounded-xl px-3 py-2.5 group hover:opacity-90 transition-opacity bg-[#fdf1f1] dark:bg-slate-800/80 border border-transparent dark:border-slate-700/50"
             >
               {/* File type badge */}
               <div
@@ -89,10 +88,10 @@ export default function DarsMateriallari() {
 
               {/* Text info */}
               <div className="flex-1 min-w-0">
-                <p className="text-[#283593] font-semibold text-[11px] leading-tight truncate">
+                <p className="text-[#283593] dark:text-slate-200 font-semibold text-[11px] leading-tight truncate">
                   {m.subject} · {m.title}
                 </p>
-                <p className="text-[#b0bec5] text-[10px] mt-0.5">{m.date}</p>
+                <p className="text-[#b0bec5] dark:text-slate-400 text-[10px] mt-0.5">{m.date}</p>
               </div>
 
               {/* Actions */}
@@ -119,42 +118,42 @@ export default function DarsMateriallari() {
 
       {/* Add Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h3 className="font-bold text-base text-[#283593]">Material qo'shish</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-2xl p-6 w-full max-w-sm flex flex-col gap-4 border border-gray-100 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-100">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700/80 pb-3">
+              <h3 className="font-bold text-base text-[#283593] dark:text-white">Material qo'shish</h3>
+              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">
                 <X size={18} />
               </button>
             </div>
 
             <form onSubmit={handleAdd} className="flex flex-col gap-3">
               <div>
-                <label className="text-xs font-semibold text-[#455a7a] mb-1 block">Fan</label>
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">Fan</label>
                 <input
                   type="text"
                   required
                   placeholder="masalan: Geografiya"
                   value={form.subject}
                   onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                  className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#455a7a] mb-1 block">Mavzu / Nomi</label>
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">Mavzu / Nomi</label>
                 <input
                   type="text"
                   required
                   placeholder="masalan: Iqlim mintaqalari"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                  className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#455a7a] mb-1 block">Fayl turi</label>
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">Fayl turi</label>
                 <div className="flex gap-2">
                   {['PPT', 'PDF', 'DOC'].map((t) => (
                     <button
@@ -164,7 +163,7 @@ export default function DarsMateriallari() {
                       className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all border ${
                         form.type === t
                           ? 'border-[#3949ab] bg-[#3949ab] text-white'
-                          : 'border-gray-200 bg-[#f7f9fc] text-gray-600'
+                          : 'border-gray-200 dark:border-slate-700 bg-[#f7f9fc] dark:bg-slate-800 text-gray-600 dark:text-slate-300'
                       }`}
                     >
                       {t}
@@ -177,7 +176,7 @@ export default function DarsMateriallari() {
                 <button
                   type="button"
                   onClick={() => setShowModal(false)}
-                  className="flex-1 h-10 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50"
+                  className="flex-1 h-10 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
                 >
                   Bekor qilish
                 </button>

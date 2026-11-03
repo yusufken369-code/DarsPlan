@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { ChevronDown, GraduationCap, LogOut } from 'lucide-react';
+import { ChevronDown, GraduationCap, LogOut, Sun, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
+import { useTheme } from '../context/ThemeContext';
 import { getLessonsForDate } from '../utils/dateUtils';
 
 export default function Header() {
   const [open, setOpen] = useState(false);
   const { user, signOut } = useAuth();
   const { lessons } = useData();
+  const { isDark, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const fullName =
@@ -85,6 +87,15 @@ export default function Header() {
 
       {/* Right controls */}
       <div className="flex items-center flex-shrink-0">
+        {/* Quick theme toggle button in header */}
+        <button
+          onClick={toggleTheme}
+          className="p-1.5 rounded-full text-white/85 hover:text-white hover:bg-white/15 transition-all mr-2"
+          title={isDark ? "Kunduzgi rejimga o'tish" : "Tungi rejimga o'tish"}
+        >
+          {isDark ? <Sun size={17} /> : <Moon size={17} />}
+        </button>
+
         {/* Profile dropdown trigger */}
         <div className="relative">
           <button
@@ -106,30 +117,64 @@ export default function Header() {
                 className="fixed inset-0 z-40"
                 onClick={() => setOpen(false)}
               />
-              <div className="absolute right-0 top-10 bg-white rounded-xl shadow-xl py-1.5 w-52 z-50 animate-in fade-in zoom-in-95 duration-100 border border-gray-100">
-                <div className="px-4 py-2 border-b border-gray-100">
-                  <p className="font-semibold text-[#283593] text-sm truncate">{fullName}</p>
-                  <p className="text-xs text-gray-400 truncate">{user?.email || roleTitle}</p>
+              <div className="absolute right-0 top-10 bg-white dark:bg-[#1e293b] rounded-2xl shadow-2xl py-2 w-56 z-50 animate-in fade-in zoom-in-95 duration-100 border border-gray-100 dark:border-slate-700/80">
+                <div className="px-4 py-2.5 border-b border-gray-100 dark:border-slate-700/70">
+                  <p className="font-bold text-[#283593] dark:text-white text-sm truncate">{fullName}</p>
+                  <p className="text-xs text-gray-400 dark:text-slate-400 truncate">{user?.email || roleTitle}</p>
                 </div>
-                {['Profil', 'Sozlamalar'].map((item) => (
+
+                <div className="py-1">
+                  {['Profil', 'Sozlamalar'].map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => {
+                        setOpen(false);
+                        navigate('/sozlamalar');
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs font-semibold text-gray-700 dark:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700/60 transition-colors"
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Dark / Light Mode Switcher inside dropdown */}
+                <div className="px-4 py-2.5 flex items-center justify-between border-t border-gray-100 dark:border-slate-700/70 bg-gray-50/60 dark:bg-slate-800/40">
+                  <div className="flex items-center gap-2 text-xs font-bold text-[#455a7a] dark:text-slate-200">
+                    {isDark ? (
+                      <Moon size={14} className="text-indigo-400" />
+                    ) : (
+                      <Sun size={14} className="text-amber-500" />
+                    )}
+                    <span>{isDark ? 'Tungi rejim' : 'Kunduzgi rejim'}</span>
+                  </div>
                   <button
-                    key={item}
-                    onClick={() => {
-                      setOpen(false);
-                      navigate('/sozlamalar');
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+                    type="button"
+                    onClick={toggleTheme}
+                    className={`w-11 h-6 rounded-full transition-colors relative flex items-center px-0.5 ${
+                      isDark ? 'bg-[#3949ab]' : 'bg-gray-300'
+                    }`}
+                    title={isDark ? "Kunduzgi rejimga o'tish" : "Tungi rejimga o'tish"}
                   >
-                    {item}
+                    <span
+                      className={`w-5 h-5 rounded-full bg-white shadow-sm transform transition-transform flex items-center justify-center text-[10px] ${
+                        isDark ? 'translate-x-5' : 'translate-x-0'
+                      }`}
+                    >
+                      {isDark ? '🌙' : '☀️'}
+                    </span>
                   </button>
-                ))}
-                <button
-                  onClick={handleLogout}
-                  className="w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-red-50 flex items-center justify-between transition-colors border-t border-gray-50"
-                >
-                  <span>Chiqish</span>
-                  <LogOut size={14} />
-                </button>
+                </div>
+
+                <div className="pt-1 border-t border-gray-100 dark:border-slate-700/70">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full text-left px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 flex items-center justify-between transition-colors"
+                  >
+                    <span>Chiqish</span>
+                    <LogOut size={13} />
+                  </button>
+                </div>
               </div>
             </>
           )}

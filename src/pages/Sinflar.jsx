@@ -70,8 +70,8 @@ export default function Sinflar() {
       {/* Title bar */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold text-[#283593]">Sinflar va guruhlar</h1>
-          <p className="text-xs text-[#90a4ae] mt-0.5">
+          <h1 className="text-xl font-bold text-[#283593] dark:text-white">Sinflar va guruhlar</h1>
+          <p className="text-xs text-[#90a4ae] dark:text-slate-400 mt-0.5">
             Siz dars beradigan sinflar, guruhlar va ularning o'quvchilari
           </p>
         </div>
@@ -85,14 +85,14 @@ export default function Sinflar() {
       </div>
 
       {/* Main card */}
-      <div className="bg-white rounded-2xl p-6 shadow-sm min-h-[380px] flex flex-col">
+      <div className="bg-white dark:bg-[#151f32] rounded-2xl p-6 shadow-sm min-h-[380px] flex flex-col border border-transparent dark:border-slate-800 transition-colors duration-200">
         {isEmpty ? (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-gray-100 rounded-2xl my-auto">
-            <div className="w-14 h-14 rounded-2xl bg-indigo-50 text-[#3949ab] flex items-center justify-center mb-3">
+          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center border-2 border-dashed border-gray-100 dark:border-slate-800 rounded-2xl my-auto">
+            <div className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 text-[#3949ab] dark:text-indigo-400 flex items-center justify-center mb-3">
               <Users size={26} />
             </div>
-            <h2 className="text-base font-bold text-[#283593] mb-1">Hozircha sinflar yo'q</h2>
-            <p className="text-xs text-[#90a4ae] max-w-sm mb-4 leading-relaxed">
+            <h2 className="text-base font-bold text-[#283593] dark:text-white mb-1">Hozircha sinflar yo'q</h2>
+            <p className="text-xs text-[#90a4ae] dark:text-slate-400 max-w-sm mb-4 leading-relaxed">
               O'zingiz dars o'tadigan birinchi sinfni qo'shing va o'quvchilar ro'yxatini shakllantiring.
             </p>
             <button
@@ -113,11 +113,11 @@ export default function Sinflar() {
                 <div
                   key={cls.id}
                   onClick={() => setSelectedClass(cls)}
-                  className="p-5 rounded-2xl border border-gray-100 bg-[#f7f9fc] hover:shadow-md hover:border-indigo-100 transition-all cursor-pointer relative group flex flex-col justify-between"
+                  className="p-5 rounded-2xl border border-gray-100 dark:border-slate-700/80 bg-[#f7f9fc] dark:bg-slate-800/60 hover:shadow-md hover:border-indigo-100 dark:hover:border-slate-600 transition-all cursor-pointer relative group flex flex-col justify-between"
                 >
                   <div>
                     <div className="flex items-start justify-between">
-                      <div className="w-11 h-11 rounded-xl bg-white text-[#3949ab] flex items-center justify-center shadow-sm font-bold text-sm">
+                      <div className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 text-[#3949ab] dark:text-indigo-400 flex items-center justify-center shadow-sm font-bold text-sm">
                         <School size={20} />
                       </div>
                       <button
@@ -127,24 +127,24 @@ export default function Sinflar() {
                             deleteClass(cls.id);
                           }
                         }}
-                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1.5 rounded-lg hover:bg-red-50"
+                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30"
                         title="O'chirish"
                       >
                         <Trash2 size={15} />
                       </button>
                     </div>
 
-                    <h3 className="font-extrabold text-lg text-[#283593] mt-3 leading-snug">
+                    <h3 className="font-extrabold text-lg text-[#283593] dark:text-white mt-3 leading-snug">
                       {cls.name}
                     </h3>
-                    <p className="text-xs text-[#90a4ae] mt-0.5">
-                      Xona: <span className="text-[#455a7a] font-medium">{cls.room || 'Belgilanmagan'}</span>
+                    <p className="text-xs text-[#90a4ae] dark:text-slate-400 mt-0.5">
+                      Xona: <span className="text-[#455a7a] dark:text-slate-300 font-medium">{cls.room || 'Belgilanmagan'}</span>
                     </p>
                   </div>
 
-                  <div className="mt-5 pt-3.5 border-t border-gray-200/70 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5 text-xs text-[#455a7a]">
-                      <Users size={14} className="text-[#3949ab]" />
+                  <div className="mt-5 pt-3.5 border-t border-gray-200/70 dark:border-slate-700/70 flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-xs text-[#455a7a] dark:text-slate-300">
+                      <Users size={14} className="text-[#3949ab] dark:text-indigo-400" />
                       <span>{count} nafar o'quvchi</span>
                     </div>
 
@@ -154,7 +154,7 @@ export default function Sinflar() {
                         e.stopPropagation();
                         setSelectedClass(cls);
                       }}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 text-[#3949ab] hover:bg-indigo-100 text-[11px] font-bold transition-colors"
+                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-[#3949ab] dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-[11px] font-bold transition-colors"
                     >
                       <UserPlus size={13} />
                       <span>O'quvchilar</span>
@@ -169,13 +169,13 @@ export default function Sinflar() {
 
       {/* ── MODAL 1: Yangi sinf qo'shish ── */}
       {showAddClassModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-              <h3 className="font-bold text-base text-[#283593]">Yangi sinf / guruh ochish</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#1e293b] rounded-2xl shadow-2xl p-6 w-full max-w-sm flex flex-col gap-4 border border-gray-100 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between border-b border-gray-100 dark:border-slate-700/80 pb-3">
+              <h3 className="font-bold text-base text-[#283593] dark:text-white">Yangi sinf / guruh ochish</h3>
               <button
                 onClick={() => setShowAddClassModal(false)}
-                className="text-gray-400 hover:text-gray-600 p-1 rounded-lg hover:bg-gray-100"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-slate-800"
               >
                 <X size={18} />
               </button>
@@ -183,7 +183,7 @@ export default function Sinflar() {
 
             <form onSubmit={handleAddClass} className="flex flex-col gap-3">
               <div>
-                <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                   Sinf / Guruh nomi
                 </label>
                 <input
@@ -192,12 +192,12 @@ export default function Sinflar() {
                   placeholder="masalan: 9-A yoki Ingliz tili A1"
                   value={classForm.name}
                   onChange={(e) => setClassForm({ ...classForm, name: e.target.value })}
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                  className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                   Xona raqami / Bino
                 </label>
                 <input
@@ -205,12 +205,12 @@ export default function Sinflar() {
                   placeholder="masalan: 204-xona yoki 2-bino"
                   value={classForm.room}
                   onChange={(e) => setClassForm({ ...classForm, room: e.target.value })}
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                  className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-[#455a7a] mb-1 block">
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                   Boshlang'ich o'quvchilar soni (ixtiyoriy)
                 </label>
                 <input
@@ -219,7 +219,7 @@ export default function Sinflar() {
                   placeholder="masalan: 25"
                   value={classForm.student_count}
                   onChange={(e) => setClassForm({ ...classForm, student_count: e.target.value })}
-                  className="w-full h-10 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc]"
+                  className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                 />
               </div>
 
@@ -227,7 +227,7 @@ export default function Sinflar() {
                 <button
                   type="button"
                   onClick={() => setShowAddClassModal(false)}
-                  className="flex-1 h-10 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+                  className="flex-1 h-10 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors"
                 >
                   Bekor qilish
                 </button>
@@ -246,19 +246,19 @@ export default function Sinflar() {
 
       {/* ── MODAL 2: Guruhdagi o'quvchilarni boshqarish va o'quvchi qo'shish ── */}
       {selectedClass && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-white dark:bg-[#1e293b] rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden border border-gray-100 dark:border-slate-700 animate-in fade-in zoom-in-95 duration-150">
             {/* Modal Header */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 bg-[#f7f9fc]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 dark:border-slate-700/80 bg-[#f7f9fc] dark:bg-slate-900/60">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-[#ef5b5b] text-white flex items-center justify-center shadow-sm font-bold">
                   <School size={18} />
                 </div>
                 <div>
-                  <h3 className="font-extrabold text-base text-[#283593]">
+                  <h3 className="font-extrabold text-base text-[#283593] dark:text-white">
                     {selectedClass.name}
                   </h3>
-                  <p className="text-xs text-[#90a4ae] mt-0.5">
+                  <p className="text-xs text-[#90a4ae] dark:text-slate-400 mt-0.5">
                     {selectedClass.room ? `${selectedClass.room} · ` : ''}
                     Jami {activeClassStudents.length} nafar o'quvchi
                   </p>
@@ -267,7 +267,7 @@ export default function Sinflar() {
 
               <button
                 onClick={() => setSelectedClass(null)}
-                className="text-gray-400 hover:text-gray-600 p-1.5 rounded-xl hover:bg-gray-200/50 transition-colors"
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1.5 rounded-xl hover:bg-gray-200/50 dark:hover:bg-slate-800 transition-colors"
               >
                 <X size={18} />
               </button>
@@ -276,16 +276,16 @@ export default function Sinflar() {
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto flex flex-col gap-6">
               {/* Form to add a student */}
-              <div className="bg-[#f0f4ff] border border-indigo-100 rounded-2xl p-4">
-                <h4 className="text-xs font-bold text-[#283593] flex items-center gap-1.5 mb-3">
-                  <UserPlus size={15} className="text-[#3949ab]" />
+              <div className="bg-[#f0f4ff] dark:bg-slate-900/60 border border-indigo-100 dark:border-slate-800 rounded-2xl p-4">
+                <h4 className="text-xs font-bold text-[#283593] dark:text-white flex items-center gap-1.5 mb-3">
+                  <UserPlus size={15} className="text-[#3949ab] dark:text-indigo-400" />
                   <span>Yangi o'quvchi qo'shish</span>
                 </h4>
 
                 <form onSubmit={handleAddStudent} className="flex flex-col gap-2.5">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
-                      <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                      <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                         O'quvchi F.I.SH. *
                       </label>
                       <input
@@ -294,12 +294,12 @@ export default function Sinflar() {
                         placeholder="masalan: Aliyev Jasur"
                         value={studentForm.name}
                         onChange={(e) => setStudentForm({ ...studentForm, name: e.target.value })}
-                        className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                        className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-800"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                      <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                         Telefon raqami
                       </label>
                       <input
@@ -307,14 +307,14 @@ export default function Sinflar() {
                         placeholder="+998 90 123 45 67"
                         value={studentForm.phone}
                         onChange={(e) => setStudentForm({ ...studentForm, phone: e.target.value })}
-                        className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                        className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-800"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                     <div>
-                      <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                      <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                         Ota-onasi telefoni
                       </label>
                       <input
@@ -324,12 +324,12 @@ export default function Sinflar() {
                         onChange={(e) =>
                           setStudentForm({ ...studentForm, parent_phone: e.target.value })
                         }
-                        className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                        className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-800"
                       />
                     </div>
 
                     <div>
-                      <label className="text-[11px] font-semibold text-[#455a7a] mb-1 block">
+                      <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
                         Eslatma / Izoh
                       </label>
                       <input
@@ -337,7 +337,7 @@ export default function Sinflar() {
                         placeholder="masalan: A'lochi yoki sardor"
                         value={studentForm.note}
                         onChange={(e) => setStudentForm({ ...studentForm, note: e.target.value })}
-                        className="w-full h-9 px-3 rounded-xl border border-gray-200 text-xs text-[#283593] focus:border-[#3949ab] focus:outline-none bg-white"
+                        className="w-full h-9 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-800"
                       />
                     </div>
                   </div>
@@ -357,18 +357,18 @@ export default function Sinflar() {
 
               {/* Students List */}
               <div>
-                <h4 className="text-xs font-bold text-[#283593] mb-3 flex items-center justify-between">
+                <h4 className="text-xs font-bold text-[#283593] dark:text-white mb-3 flex items-center justify-between">
                   <span>O'quvchilar ro'yxati ({activeClassStudents.length})</span>
-                  <span className="text-[10px] text-[#90a4ae] font-normal">
+                  <span className="text-[10px] text-[#90a4ae] dark:text-slate-400 font-normal">
                     Baholash uchun o'quvchi ustiga bosing
                   </span>
                 </h4>
 
                 {activeClassStudents.length === 0 ? (
-                  <div className="p-8 text-center border-2 border-dashed border-gray-100 rounded-2xl bg-[#fafbfe]">
-                    <User size={24} className="mx-auto text-gray-400 mb-2" />
-                    <p className="text-xs font-bold text-[#283593]">Hozircha o'quvchilar kiritilmagan</p>
-                    <p className="text-[11px] text-[#90a4ae] mt-0.5">
+                  <div className="p-8 text-center border-2 border-dashed border-gray-100 dark:border-slate-800 rounded-2xl bg-[#fafbfe] dark:bg-slate-900/40">
+                    <User size={24} className="mx-auto text-gray-400 dark:text-slate-500 mb-2" />
+                    <p className="text-xs font-bold text-[#283593] dark:text-white">Hozircha o'quvchilar kiritilmagan</p>
+                    <p className="text-[11px] text-[#90a4ae] dark:text-slate-400 mt-0.5">
                       Yuqoridagi formadan foydalanib o'quvchilarni birma-bir ro'yxatga oling.
                     </p>
                   </div>
@@ -378,20 +378,20 @@ export default function Sinflar() {
                       <div
                         key={std.id}
                         onClick={() => setEditingStudent(std)}
-                        className="flex items-center justify-between p-3 rounded-2xl bg-[#f7f9fc] border border-gray-100 hover:bg-white hover:border-indigo-200 hover:shadow-md transition-all cursor-pointer group"
+                        className="flex items-center justify-between p-3 rounded-2xl bg-[#f7f9fc] dark:bg-slate-800/70 border border-gray-100 dark:border-slate-700 hover:bg-white hover:dark:bg-slate-800 hover:border-indigo-200 hover:dark:border-slate-600 hover:shadow-md transition-all cursor-pointer group"
                       >
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <span className="w-7 h-7 rounded-full bg-white text-[#3949ab] font-bold text-xs flex items-center justify-center border border-gray-200 flex-shrink-0 shadow-sm">
+                          <span className="w-7 h-7 rounded-full bg-white dark:bg-slate-900 text-[#3949ab] dark:text-indigo-400 font-bold text-xs flex items-center justify-center border border-gray-200 dark:border-slate-700 flex-shrink-0 shadow-sm">
                             {idx + 1}
                           </span>
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2 flex-wrap">
-                              <p className="text-xs font-bold text-[#283593] truncate">{std.name}</p>
+                              <p className="text-xs font-bold text-[#283593] dark:text-white truncate">{std.name}</p>
 
                               {/* Grade badge (2..5) - Exact color styling, no emoji */}
                               {std.grade && GRADE_CONFIG[std.grade] && (
                                 <span
-                                  className={`px-2 py-0.5 rounded-full text-[10px] font-black border flex items-center gap-1 shadow-xs ${GRADE_CONFIG[std.grade].lightBg}`}
+                                  className={`px-2 py-0.5 rounded-full text-[10px] font-black border flex items-center gap-1 shadow-xs ${GRADE_CONFIG[std.grade].lightBg} dark:bg-slate-900/80`}
                                   title={`Baho: ${std.grade} - ${GRADE_CONFIG[std.grade].label}`}
                                 >
                                   <span className={`w-2 h-2 rounded-full ${GRADE_CONFIG[std.grade].bg}`} />
@@ -400,11 +400,11 @@ export default function Sinflar() {
                               )}
                             </div>
 
-                            <div className="flex items-center gap-3 text-[10px] text-[#90a4ae] mt-1 flex-wrap">
+                            <div className="flex items-center gap-3 text-[10px] text-[#90a4ae] dark:text-slate-400 mt-1 flex-wrap">
                               {std.phone && <span>Tel: {std.phone}</span>}
                               {std.parent_phone && <span>Ota-ona: {std.parent_phone}</span>}
                               {std.note && (
-                                <span className="bg-indigo-50 text-[#3949ab] px-1.5 py-0.2 rounded font-medium">
+                                <span className="bg-indigo-50 dark:bg-indigo-950/60 text-[#3949ab] dark:text-indigo-300 px-1.5 py-0.2 rounded font-medium">
                                   {std.note}
                                 </span>
                               )}
@@ -419,7 +419,7 @@ export default function Sinflar() {
                               e.stopPropagation();
                               setEditingStudent(std);
                             }}
-                            className="text-[#3949ab] hover:text-[#283593] p-1.5 rounded-lg hover:bg-indigo-50 transition-colors"
+                            className="text-[#3949ab] dark:text-indigo-400 hover:text-[#283593] dark:hover:text-white p-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-slate-700 transition-colors"
                             title="Tahrirlash / Baholash"
                           >
                             <Edit3 size={14} />
@@ -432,7 +432,7 @@ export default function Sinflar() {
                                 deleteStudent(std.id);
                               }
                             }}
-                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 transition-all"
+                            className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/40 transition-all"
                             title="O'chirish"
                           >
                             <Trash2 size={14} />
@@ -446,11 +446,11 @@ export default function Sinflar() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-3 border-t border-gray-100 flex justify-end bg-gray-50">
+            <div className="px-6 py-3 border-t border-gray-100 dark:border-slate-700/80 flex justify-end bg-gray-50 dark:bg-slate-900/60">
               <button
                 type="button"
                 onClick={() => setSelectedClass(null)}
-                className="px-4 py-2 rounded-xl bg-white border border-gray-200 text-xs font-bold text-[#455a7a] hover:bg-gray-100 transition-colors shadow-sm"
+                className="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-bold text-[#455a7a] dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors shadow-sm"
               >
                 Yopish
               </button>

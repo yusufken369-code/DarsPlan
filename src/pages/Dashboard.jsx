@@ -10,8 +10,7 @@ export default function Dashboard() {
 
       {/* ── Timetable section ── */}
       <section
-        className="rounded-2xl p-4 shadow-sm"
-        style={{ background: '#eef1f8' }}
+        className="rounded-2xl p-4 shadow-sm bg-[#eef1f8] dark:bg-[#151f32] border border-transparent dark:border-slate-800 transition-colors duration-200"
       >
         <Timetable />
       </section>

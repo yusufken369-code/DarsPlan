@@ -25,18 +25,18 @@ import StudentEditModal, { GRADE_CONFIG } from '../components/StudentEditModal';
 /* ── ATTENDANCE CODE CONFIGURATION ── */
 const ATTENDANCE_CODES = [
   {
-    code: 'P',
+    code: 'B',
     label: 'Bor',
-    title: 'Darsga kelgan (Present)',
+    title: 'Darsga kelgan (Bor)',
     activeBg: 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-400 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-400/20',
     badgeBg: 'bg-emerald-500 text-white',
     ringColor: 'border-emerald-500 text-emerald-600 dark:text-emerald-400',
     dotBg: 'bg-emerald-500',
   },
   {
-    code: 'A',
+    code: 'Y',
     label: "Yo'q",
-    title: 'Kelmagan (Absent)',
+    title: "Darsga kelmagan (Yo'q)",
     activeBg: 'bg-rose-50 dark:bg-rose-950/60 border-rose-400 text-rose-700 dark:text-rose-300 ring-2 ring-rose-400/20',
     badgeBg: 'bg-rose-500 text-white',
     ringColor: 'border-rose-500 text-rose-600 dark:text-rose-400',
@@ -45,7 +45,7 @@ const ATTENDANCE_CODES = [
   {
     code: 'K',
     label: 'Kech',
-    title: 'Kechikkan (Late / Tardy)',
+    title: 'Kechikkan (Kech)',
     activeBg: 'bg-amber-50 dark:bg-amber-950/60 border-amber-400 text-amber-700 dark:text-amber-300 ring-2 ring-amber-400/20',
     badgeBg: 'bg-amber-500 text-white',
     ringColor: 'border-amber-500 text-amber-600 dark:text-amber-400',
@@ -54,12 +54,17 @@ const ATTENDANCE_CODES = [
   {
     code: 'S',
     label: 'Sababli',
-    title: 'Sababli kelmagan (Excused Leave)',
+    title: 'Sababli kelmagan (Sababli)',
     activeBg: 'bg-orange-50 dark:bg-orange-950/60 border-orange-400 text-orange-700 dark:text-orange-300 ring-2 ring-orange-400/20',
     badgeBg: 'bg-orange-500 text-white',
     ringColor: 'border-orange-500 text-orange-600 dark:text-orange-400',
     dotBg: 'bg-orange-500',
   },
+];
+
+const UZ_MONTHS = [
+  'yanvar', 'fevral', 'mart', 'aprel', 'may', 'iyun',
+  'iyul', 'avgust', 'sentabr', 'oktabr', 'noyabr', 'dekabr'
 ];
 
 export default function SinfDavomati() {
@@ -183,13 +188,13 @@ export default function SinfDavomati() {
     });
   };
 
-  // Mark all students present (Bor - P)
+  // Mark all students present (Bor - B)
   const handleMarkAllPresent = () => {
     setRecords((prev) => {
       const updated = { ...prev };
       classStudents.forEach((std) => {
         const cur = updated[std.id] || { grade: null, comment: '' };
-        updated[std.id] = { ...cur, status: 'P' };
+        updated[std.id] = { ...cur, status: 'B' };
       });
       return updated;
     });
@@ -238,32 +243,31 @@ export default function SinfDavomati() {
     setSelectedDate(formatToDateString(date));
   };
 
-  // Stats calculation
+  // Stats calculation (B = Bor, Y = Yo'q, K = Kech, S = Sababli)
   const stats = useMemo(() => {
-    let p = 0;
-    let a = 0;
+    let b = 0;
+    let y = 0;
     let k = 0;
     let s = 0;
     let graded = 0;
     classStudents.forEach((std) => {
       const r = records[std.id];
-      if (r?.status === 'P') p++;
-      else if (r?.status === 'A') a++;
+      if (r?.status === 'B' || r?.status === 'P') b++;
+      else if (r?.status === 'Y' || r?.status === 'A') y++;
       else if (r?.status === 'K') k++;
       else if (r?.status === 'S') s++;
 
       if (r?.grade) graded++;
     });
-    return { p, a, k, s, graded, total: classStudents.length };
+    return { b, y, k, s, graded, total: classStudents.length };
   }, [classStudents, records]);
 
-  // Format date display (e.g. 21-yanvar, 2025 yoki Bugun)
+  // Format date display (e.g. 3-noyabr, 2026-yil)
   const formattedDateHeader = useMemo(() => {
     try {
       const [y, m, d] = selectedDate.split('-').map(Number);
-      const dt = new Date(y, m - 1, d);
-      const options = { year: 'numeric', month: 'long', day: 'numeric' };
-      return dt.toLocaleDateString('uz-UZ', options);
+      const monthName = UZ_MONTHS[m - 1] || '';
+      return `${d}-${monthName}, ${y}-yil`;
     } catch {
       return selectedDate;
     }
@@ -393,11 +397,11 @@ export default function SinfDavomati() {
           </span>
           <span className="px-2.5 py-1 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 font-bold flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            Bor (P): {stats.p}
+            Bor (B): {stats.b}
           </span>
           <span className="px-2.5 py-1 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-700 dark:text-rose-300 border border-rose-200/60 font-bold flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
-            Yo'q (A): {stats.a}
+            Yo'q (Y): {stats.y}
           </span>
           <span className="px-2.5 py-1 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 border border-amber-200/60 font-bold flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
@@ -415,7 +419,7 @@ export default function SinfDavomati() {
             type="button"
             onClick={handleMarkAllPresent}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-xs font-bold hover:bg-emerald-100 transition-colors active:scale-95"
-            title="Hamma o'quvchilarni 'Bor (P)' qilib belgilash"
+            title="Hamma o'quvchilarni 'Bor (B)' qilib belgilash"
           >
             <UserCheck size={14} />
             <span>Hammasini bor qilish</span>
@@ -515,11 +519,14 @@ export default function SinfDavomati() {
                         </div>
                       </td>
 
-                      {/* 2. Attendance Codes (P, A, K, S) matching user screenshot pills */}
+                      {/* 2. Attendance Codes (B, Y, K, S: Bor, Yo'q, Kech, Sababli) matching user screenshot */}
                       <td className="py-3.5 px-4">
                         <div className="flex items-center gap-2 flex-wrap">
                           {ATTENDANCE_CODES.map((item) => {
-                            const isSelected = selectedCode === item.code;
+                            const isSelected =
+                              selectedCode === item.code ||
+                              (item.code === 'B' && selectedCode === 'P') ||
+                              (item.code === 'Y' && selectedCode === 'A');
                             return (
                               <button
                                 key={item.code}

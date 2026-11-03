@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,6 +14,8 @@ import {
   User,
   Award,
   Edit3,
+  ClipboardCheck,
+  ArrowRight,
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import StudentEditModal, { GRADE_CONFIG } from './StudentEditModal';
@@ -151,6 +154,7 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
 
 /* ─── Timetable Component ────────────────────────────────────────── */
 export default function Timetable() {
+  const navigate = useNavigate();
   const { lessons, addLesson, deleteLesson, students, addStudent, updateStudent, deleteStudent } = useData();
   const [weekOffset, setWeekOffset] = useState(0);
   const [showModal, setShowModal] = useState(false);
@@ -947,7 +951,7 @@ export default function Timetable() {
             </div>
 
             {/* Modal Footer */}
-            <div className="px-6 py-3 border-t border-gray-100 dark:border-slate-700/80 flex items-center justify-between bg-gray-50 dark:bg-slate-900/60">
+            <div className="px-6 py-3 border-t border-gray-100 dark:border-slate-700/80 flex items-center justify-between bg-gray-50 dark:bg-slate-900/60 flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => {
@@ -962,13 +966,28 @@ export default function Timetable() {
                 <span>Darsni o'chirish</span>
               </button>
 
-              <button
-                type="button"
-                onClick={() => setSelectedLesson(null)}
-                className="px-4 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-bold text-[#455a7a] dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors shadow-sm"
-              >
-                Yopish
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const grp = selectedLesson.class_name || selectedLesson.cls || '1-guruh';
+                    navigate(`/sinflar/${grp}`);
+                  }}
+                  className="px-3.5 py-1.5 rounded-xl bg-[#3949ab] hover:bg-[#303f9f] text-white text-xs font-bold transition-colors shadow-xs flex items-center gap-1.5"
+                >
+                  <ClipboardCheck size={14} />
+                  <span>Davomat va baholash</span>
+                  <ArrowRight size={13} />
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedLesson(null)}
+                  className="px-4 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 text-xs font-bold text-[#455a7a] dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors shadow-sm"
+                >
+                  Yopish
+                </button>
+              </div>
             </div>
           </div>
         </div>

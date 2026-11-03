@@ -8,6 +8,7 @@ const EMPTY_WORKSPACE = {
   assignments: [],
   lessonPlans: [],
   students: [],
+  attendance: [],
 };
 
 // Helper to get user-specific workspace data
@@ -563,5 +564,55 @@ export const dataService = {
     }
     await saveUserWorkspace(userId, ws);
     return true;
+  },
+
+  // ── ATTENDANCE (DAVOMAT VA BAHOLASH) ──
+  async getAttendance(userId, classId, date) {
+    if (!userId || !classId || !date) return null;
+    const ws = await getUserWorkspace(userId);
+    const list = ws.attendance || [];
+    const found = list.find(
+      (a) => String(a.class_id) === String(classId) && a.date === date
+    );
+    return found || null;
+  },
+
+  async saveAttendance(userId, classId, date, records) {
+    if (!userId || !classId || !date) return false;
+    const ws = await getUserWorkspace(userId);
+    if (!ws.attendance) ws.attendance = [];
+
+    const existingIdx = ws.attendance.findIndex(
+      (a) => String(a.class_id) === String(classId) && a.date === date
+    );
+
+    const payload = {
+      id: existingIdx >= 0 ? ws.attendance[existingIdx].id : `att_${classId}_${date}`,
+      class_id: classId,
+      date: date,
+      records: records, // { [studentId]: { status: 'P'|'A'|'K'|'S', grade: 2..5|null, comment: string } }
+      updated_at: new Date().toISOString(),
+    };
+
+    if (existingIdx >= 0) {
+      ws.attendance[existingIdx] = payload;
+    } else {
+      ws.attendance.push(payload);
+    }
+
+    // Also sync latest grades back to students
+    if (records && ws.students) {
+      Object.entries(records).forEach(([stdId, rec]) => {
+        if (rec && rec.grade) {
+          const std = ws.students.find((s) => s.id === stdId);
+          if (std) {
+            std.grade = Number(rec.grade);
+          }
+        }
+      });
+    }
+
+    await saveUserWorkspace(userId, ws);
+    return payload;
   },
 };

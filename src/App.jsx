@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import DarsJadvali from './pages/DarsJadvali';
 import DarsRejalari from './pages/DarsRejalari';
 import Sinflar from './pages/Sinflar';
+import SinfDavomati from './pages/SinfDavomati';
 import Materiallar from './pages/Materiallar';
 import Vazifalar from './pages/Vazifalar';
 import Sozlamalar from './pages/Sozlamalar';
@@ -78,8 +79,9 @@ function DashboardLayout() {
             <Route path="/"            element={<Dashboard />} />
             <Route path="/jadval"      element={<DarsJadvali />} />
             <Route path="/rejalar"     element={<DarsRejalari />} />
-            <Route path="/sinflar"     element={<Sinflar />} />
-            <Route path="/materiallar" element={<Materiallar />} />
+            <Route path="/sinflar"             element={<Sinflar />} />
+            <Route path="/sinflar/:classId"    element={<SinfDavomati />} />
+            <Route path="/materiallar"         element={<Materiallar />} />
             <Route path="/vazifalar"   element={<Vazifalar />} />
             <Route path="/sozlamalar"  element={<Sozlamalar />} />
             <Route path="*"            element={<Navigate to="/" replace />} />

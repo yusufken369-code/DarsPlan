@@ -231,6 +231,28 @@ export function DataProvider({ children }) {
     return ok;
   };
 
+  const getAttendance = async (classId, date) => {
+    if (!user?.id) return null;
+    return await dataService.getAttendance(user.id, classId, date);
+  };
+
+  const saveAttendance = async (classId, date, records) => {
+    if (!user?.id) return false;
+    const res = await dataService.saveAttendance(user.id, classId, date, records);
+    if (res && records) {
+      // Sync in-memory student grades
+      setStudents((prev) =>
+        prev.map((s) => {
+          if (records[s.id] && records[s.id].grade) {
+            return { ...s, grade: Number(records[s.id].grade) };
+          }
+          return s;
+        })
+      );
+    }
+    return res;
+  };
+
   const refreshData = () => {
     if (user?.id) {
       return loadUserData(user.id);
@@ -258,6 +280,8 @@ export function DataProvider({ children }) {
     addStudent,
     updateStudent,
     deleteStudent,
+    getAttendance,
+    saveAttendance,
     refreshData,
   };
 

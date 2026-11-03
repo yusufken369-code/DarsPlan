@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Users, Plus, Trash2, X, School, UserPlus, User, Award, Edit3 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, Plus, Trash2, X, School, UserPlus, User, Award, Edit3, ClipboardCheck, ArrowRight } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import StudentEditModal, { GRADE_CONFIG } from '../components/StudentEditModal';
 
 export default function Sinflar() {
+  const navigate = useNavigate();
   const { classes, addClass, deleteClass, students, addStudent, updateStudent, deleteStudent } = useData();
   const [showAddClassModal, setShowAddClassModal] = useState(false);
   const [selectedClass, setSelectedClass] = useState(null);
@@ -36,9 +38,9 @@ export default function Sinflar() {
     setShowAddClassModal(false);
     setClassForm({ name: '', room: '', student_count: '' });
 
-    // Open student manager directly for the new class so the teacher can add students right away
+    // Open attendance and students page directly for this newly created class!
     if (created) {
-      setSelectedClass(created);
+      navigate(`/sinflar/${created.id}`);
     }
   };
 
@@ -112,26 +114,33 @@ export default function Sinflar() {
               return (
                 <div
                   key={cls.id}
-                  onClick={() => setSelectedClass(cls)}
-                  className="p-5 rounded-2xl border border-gray-100 dark:border-slate-700/80 bg-[#f7f9fc] dark:bg-slate-800/60 hover:shadow-md hover:border-indigo-100 dark:hover:border-slate-600 transition-all cursor-pointer relative group flex flex-col justify-between"
+                  onClick={() => navigate(`/sinflar/${cls.id}`)}
+                  className="p-5 rounded-3xl border border-gray-100 dark:border-slate-700/80 bg-[#f7f9fc] dark:bg-slate-800/60 hover:shadow-lg hover:border-indigo-200 dark:hover:border-slate-600 transition-all cursor-pointer relative group flex flex-col justify-between"
+                  title="Sinf davomati va baholash sahifasiga o'tish"
                 >
                   <div>
                     <div className="flex items-start justify-between">
-                      <div className="w-11 h-11 rounded-xl bg-white dark:bg-slate-900 text-[#3949ab] dark:text-indigo-400 flex items-center justify-center shadow-sm font-bold text-sm">
+                      <div className="w-11 h-11 rounded-2xl bg-white dark:bg-slate-900 text-[#3949ab] dark:text-indigo-400 flex items-center justify-center shadow-xs font-bold text-sm">
                         <School size={20} />
                       </div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (confirm(`"${cls.name}" sinfini o'chirmoqchimisiz?`)) {
-                            deleteClass(cls.id);
-                          }
-                        }}
-                        className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30"
-                        title="O'chirish"
-                      >
-                        <Trash2 size={15} />
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <span className="px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-[#3949ab] dark:text-indigo-300 font-extrabold text-[11px] flex items-center gap-1 group-hover:bg-[#3949ab] group-hover:text-white transition-colors">
+                          <ClipboardCheck size={13} />
+                          <span>Davomat</span>
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            if (confirm(`"${cls.name}" sinfini o'chirmoqchimisiz?`)) {
+                              deleteClass(cls.id);
+                            }
+                          }}
+                          className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-opacity p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-950/30"
+                          title="O'chirish"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
                     </div>
 
                     <h3 className="font-extrabold text-lg text-[#283593] dark:text-white mt-3 leading-snug">
@@ -148,17 +157,10 @@ export default function Sinflar() {
                       <span>{count} nafar o'quvchi</span>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedClass(cls);
-                      }}
-                      className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 text-[#3949ab] dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-[11px] font-bold transition-colors"
-                    >
-                      <UserPlus size={13} />
-                      <span>O'quvchilar</span>
-                    </button>
+                    <div className="flex items-center gap-1 text-[11px] font-bold text-[#3949ab] dark:text-indigo-400 group-hover:translate-x-1 transition-transform">
+                      <span>Ochish</span>
+                      <ArrowRight size={13} />
+                    </div>
                   </div>
                 </div>
               );

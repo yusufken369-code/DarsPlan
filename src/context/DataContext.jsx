@@ -231,14 +231,14 @@ export function DataProvider({ children }) {
     return ok;
   };
 
-  const getAttendance = async (classId, date) => {
+  const getAttendance = async (classId, date, className = '') => {
     if (!user?.id) return null;
-    return await dataService.getAttendance(user.id, classId, date);
+    return await dataService.getAttendance(user.id, classId, date, className);
   };
 
-  const saveAttendance = async (classId, date, records) => {
+  const saveAttendance = async (classId, date, records, className = '') => {
     if (!user?.id) return false;
-    const res = await dataService.saveAttendance(user.id, classId, date, records);
+    const res = await dataService.saveAttendance(user.id, classId, date, records, className);
     if (res && records) {
       // Sync in-memory student grades
       setStudents((prev) =>

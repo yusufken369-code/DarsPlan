@@ -83,11 +83,18 @@ export default function SinfDavomati() {
   // Selected date (defaults to today YYYY-MM-DD)
   const [selectedDate, setSelectedDate] = useState(() => formatToDateString(new Date()));
 
-  // Active class record
+  // Active class record (with fallback so it never fails)
   const currentClass = useMemo(() => {
-    return (classes || []).find(
+    const found = (classes || []).find(
       (c) => String(c.id) === String(classId) || c.name.toLowerCase().trim() === String(classId).toLowerCase().trim()
     );
+    if (found) return found;
+    return {
+      id: classId,
+      name: classId,
+      room: '',
+      student_count: 0,
+    };
   }, [classes, classId]);
 
   // Students in this specific class / group
@@ -103,11 +110,13 @@ export default function SinfDavomati() {
   }, [students, currentClass]);
 
   // Attendance & grades dictionary for this date:
-  // { [studentId]: { status: 'P'|'A'|'K'|'S'|null, grade: 2..5|null, comment: string } }
+  // { [studentId]: { status: 'B'|'Y'|'K'|'S'|null, grade: 2..5|null, comment: string } }
   const [records, setRecords] = useState({});
   const [loadingAttendance, setLoadingAttendance] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saveSuccessMsg, setSaveSuccessMsg] = useState('');
+  const [autoSaving, setAutoSaving] = useState(false);
+  const [autoSavedMsg, setAutoSavedMsg] = useState(false);
 
   // Modals
   const [showAddStudentModal, setShowAddStudentModal] = useState(false);
@@ -124,6 +133,21 @@ export default function SinfDavomati() {
   });
   const [submittingStudent, setSubmittingStudent] = useState(false);
 
+  // Helper to immediately persist records to backend & localStorage
+  const persistRecords = async (newRecords) => {
+    if (!currentClass) return;
+    setAutoSaving(true);
+    try {
+      await saveAttendance(currentClass.id, selectedDate, newRecords, currentClass.name);
+      setAutoSavedMsg(true);
+      setTimeout(() => setAutoSavedMsg(false), 2500);
+    } catch (err) {
+      console.error('Auto save error:', err);
+    } finally {
+      setAutoSaving(false);
+    }
+  };
+
   // Load attendance data when classId or selectedDate changes
   useEffect(() => {
     let isMounted = true;
@@ -131,7 +155,7 @@ export default function SinfDavomati() {
       if (!currentClass) return;
       setLoadingAttendance(true);
       try {
-        const data = await getAttendance(currentClass.id, selectedDate);
+        const data = await getAttendance(currentClass.id, selectedDate, currentClass.name);
         if (isMounted) {
           if (data && data.records) {
             setRecords(data.records);
@@ -158,37 +182,43 @@ export default function SinfDavomati() {
     return () => {
       isMounted = false;
     };
-  }, [currentClass?.id, selectedDate, classStudents.length]);
+  }, [currentClass?.id, currentClass?.name, selectedDate, classStudents.length]);
 
-  // Handle setting attendance status for a student
+  // Handle setting attendance status for a student (with immediate auto-save)
   const handleSetStatus = (studentId, code) => {
     setRecords((prev) => {
       const current = prev[studentId] || { status: null, grade: null, comment: '' };
-      return {
+      const nextStatus = current.status === code ? null : code;
+      const updated = {
         ...prev,
         [studentId]: {
           ...current,
-          status: current.status === code ? null : code,
+          status: nextStatus,
         },
       };
+      persistRecords(updated);
+      return updated;
     });
   };
 
-  // Handle setting grade for a student (2..5)
+  // Handle setting grade for a student (2..5) (with immediate auto-save)
   const handleSetGrade = (studentId, gradeNum) => {
     setRecords((prev) => {
       const current = prev[studentId] || { status: null, grade: null, comment: '' };
-      return {
+      const nextGrade = current.grade === gradeNum ? null : gradeNum;
+      const updated = {
         ...prev,
         [studentId]: {
           ...current,
-          grade: current.grade === gradeNum ? null : gradeNum,
+          grade: nextGrade,
         },
       };
+      persistRecords(updated);
+      return updated;
     });
   };
 
-  // Mark all students present (Bor - B)
+  // Mark all students present (Bor - B) (with immediate auto-save)
   const handleMarkAllPresent = () => {
     setRecords((prev) => {
       const updated = { ...prev };
@@ -196,17 +226,18 @@ export default function SinfDavomati() {
         const cur = updated[std.id] || { grade: null, comment: '' };
         updated[std.id] = { ...cur, status: 'B' };
       });
+      persistRecords(updated);
       return updated;
     });
   };
 
-  // Submit / Save attendance
+  // Submit / Save attendance (manual button feedback)
   const handleSubmit = async () => {
     if (!currentClass) return;
     setSaving(true);
     setSaveSuccessMsg('');
     try {
-      await saveAttendance(currentClass.id, selectedDate, records);
+      await saveAttendance(currentClass.id, selectedDate, records, currentClass.name);
       setSaveSuccessMsg("Davomat va baholar muvaffaqiyatli saqlandi!");
       setTimeout(() => setSaveSuccessMsg(''), 4000);
     } catch (err) {
@@ -305,13 +336,30 @@ export default function SinfDavomati() {
             <ArrowLeft size={14} />
             <span>Sinflar va guruhlar ro'yxatiga qaytish</span>
           </button>
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2.5 flex-wrap">
             <h1 className="text-2xl font-extrabold text-[#283593] dark:text-white tracking-tight">
               Attendance · Davomat va Baholash
             </h1>
             <span className="px-3 py-0.5 rounded-full bg-pink-100 dark:bg-pink-950/70 text-[#ef5b5b] text-xs font-extrabold shadow-2xs">
               {currentClass.name}
             </span>
+
+            {/* Auto-Save live indicator */}
+            {autoSaving ? (
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950/70 text-[#3949ab] dark:text-indigo-300 font-bold text-[11px] animate-pulse border border-indigo-200 dark:border-indigo-800">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#3949ab]" />
+                Saqlanmoqda…
+              </span>
+            ) : autoSavedMsg ? (
+              <span className="flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300 font-bold text-[11px] border border-emerald-200 dark:border-emerald-800 animate-in fade-in duration-100">
+                <Check size={11} strokeWidth={3} />
+                Avtomatik saqlandi ✓
+              </span>
+            ) : (
+              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium hidden sm:inline">
+                • Avto-saqlash yoqilgan
+              </span>
+            )}
           </div>
           <p className="text-xs text-[#90a4ae] dark:text-slate-400 mt-0.5">
             {currentClass.room ? `Xona: ${currentClass.room} · ` : ''}Jami {classStudents.length} nafar o'quvchi
@@ -613,8 +661,14 @@ export default function SinfDavomati() {
 
         {/* ── TABLE FOOTER: Submit Button (Matching the blue Submit button in user image) ── */}
         <div className="p-4 px-6 border-t border-gray-200/80 dark:border-slate-800 bg-[#f8fafc] dark:bg-slate-900/60 flex items-center justify-between flex-wrap gap-3">
-          <div className="text-xs text-[#90a4ae] dark:text-slate-400">
-            Davomat va baholar <strong className="text-[#283593] dark:text-slate-200">{formattedDateHeader}</strong> sanasi uchun saqlanadi.
+          <div className="text-xs text-[#90a4ae] dark:text-slate-400 flex items-center gap-2 flex-wrap">
+            <span>
+              Davomat va baholar <strong className="text-[#283593] dark:text-slate-200">{formattedDateHeader}</strong> sanasi uchun saqlanadi.
+            </span>
+            <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2.5 py-0.5 rounded-lg border border-emerald-200/60 dark:border-emerald-800 flex items-center gap-1">
+              <Check size={11} strokeWidth={3} />
+              Har bir bosish darhol avtomatik saqlanadi
+            </span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -675,14 +729,19 @@ export default function SinfDavomati() {
               <button
                 type="button"
                 onClick={() => {
-                  // Clear note
-                  setRecords((prev) => ({
-                    ...prev,
-                    [commentStudent.id]: {
-                      ...(prev[commentStudent.id] || {}),
-                      comment: '',
-                    },
-                  }));
+                  // Clear note and persist
+                  setRecords((prev) => {
+                    const cur = prev[commentStudent.id] || { status: null, grade: null, comment: '' };
+                    const updated = {
+                      ...prev,
+                      [commentStudent.id]: {
+                        ...cur,
+                        comment: '',
+                      },
+                    };
+                    persistRecords(updated);
+                    return updated;
+                  });
                   setCommentStudent(null);
                 }}
                 className="px-3 py-2 rounded-xl text-xs font-semibold text-gray-500 hover:text-red-500 transition-colors"
@@ -692,13 +751,19 @@ export default function SinfDavomati() {
               <button
                 type="button"
                 onClick={() => {
-                  setRecords((prev) => ({
-                    ...prev,
-                    [commentStudent.id]: {
-                      ...(prev[commentStudent.id] || {}),
-                      comment: tempComment.trim(),
-                    },
-                  }));
+                  // Save note and persist
+                  setRecords((prev) => {
+                    const cur = prev[commentStudent.id] || { status: null, grade: null, comment: '' };
+                    const updated = {
+                      ...prev,
+                      [commentStudent.id]: {
+                        ...cur,
+                        comment: tempComment.trim(),
+                      },
+                    };
+                    persistRecords(updated);
+                    return updated;
+                  });
                   setCommentStudent(null);
                 }}
                 className="px-4 py-2 rounded-xl bg-[#3949ab] hover:bg-[#303f9f] text-white text-xs font-bold transition-all shadow-sm"

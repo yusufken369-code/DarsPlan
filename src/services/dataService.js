@@ -567,30 +567,60 @@ export const dataService = {
   },
 
   // ── ATTENDANCE (DAVOMAT VA BAHOLASH) ──
-  async getAttendance(userId, classId, date) {
+  async getAttendance(userId, classId, date, className = '') {
     if (!userId || !classId || !date) return null;
     const ws = await getUserWorkspace(userId);
     const list = ws.attendance || [];
-    const found = list.find(
-      (a) => String(a.class_id) === String(classId) && a.date === date
-    );
+    const targetId = String(classId).toLowerCase().trim();
+    const targetName = String(className || '').toLowerCase().trim();
+
+    const found = list.find((a) => {
+      if (a.date !== date) return false;
+      const aId = String(a.class_id || '').toLowerCase().trim();
+      const aName = String(a.class_name || '').toLowerCase().trim();
+      return (
+        aId === targetId ||
+        (targetName && aId === targetName) ||
+        (targetName && aName === targetName) ||
+        (targetId && aName === targetId)
+      );
+    });
     return found || null;
   },
 
-  async saveAttendance(userId, classId, date, records) {
+  async saveAttendance(userId, classId, date, records, className = '') {
     if (!userId || !classId || !date) return false;
     const ws = await getUserWorkspace(userId);
     if (!ws.attendance) ws.attendance = [];
 
-    const existingIdx = ws.attendance.findIndex(
-      (a) => String(a.class_id) === String(classId) && a.date === date
-    );
+    const targetId = String(classId).toLowerCase().trim();
+    const targetName = String(className || '').toLowerCase().trim();
+
+    const existingIdx = ws.attendance.findIndex((a) => {
+      if (a.date !== date) return false;
+      const aId = String(a.class_id || '').toLowerCase().trim();
+      const aName = String(a.class_name || '').toLowerCase().trim();
+      return (
+        aId === targetId ||
+        (targetName && aId === targetName) ||
+        (targetName && aName === targetName) ||
+        (targetId && aName === targetId)
+      );
+    });
+
+    const resolvedClassName =
+      className ||
+      ws.classes?.find(
+        (c) => String(c.id) === String(classId) || c.name.toLowerCase().trim() === targetId
+      )?.name ||
+      String(classId);
 
     const payload = {
       id: existingIdx >= 0 ? ws.attendance[existingIdx].id : `att_${classId}_${date}`,
       class_id: classId,
+      class_name: resolvedClassName,
       date: date,
-      records: records, // { [studentId]: { status: 'P'|'A'|'K'|'S', grade: 2..5|null, comment: string } }
+      records: records || {}, // { [studentId]: { status: 'B'|'Y'|'K'|'S', grade: 2..5|null, comment: string } }
       updated_at: new Date().toISOString(),
     };
 

@@ -16,6 +16,7 @@ import {
   Edit3,
   ClipboardCheck,
   ArrowRight,
+  LayoutGrid,
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
 import StudentEditModal, { GRADE_CONFIG } from './StudentEditModal';
@@ -29,7 +30,7 @@ import {
 
 /* ─── Time grid constants ───────────────────────────────────────── */
 const HOURS = ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'];
-const HOUR_H = 56; // px per hour
+const HOUR_H = 64; // px per hour (generous spacing for lesson cards)
 const GRID_START_H = 8; // 8:00
 
 function toMinutes(t) {
@@ -43,23 +44,23 @@ const COLORS = {
   navy: {
     bg: '#3949ab',
     text: '#ffffff',
-    time: 'rgba(255,255,255,0.7)',
-    border: '#3949ab',
-    shadow: '0 2px 8px rgba(57,73,171,0.35)',
+    time: 'rgba(255,255,255,0.85)',
+    border: '#303f9f',
+    shadow: '0 4px 12px rgba(57,73,171,0.28)',
   },
   coral: {
     bg: '#ef5b5b',
     text: '#ffffff',
-    time: 'rgba(255,255,255,0.75)',
-    border: '#ef5b5b',
-    shadow: '0 2px 8px rgba(239,91,91,0.35)',
+    time: 'rgba(255,255,255,0.88)',
+    border: '#e53935',
+    shadow: '0 4px 12px rgba(239,91,91,0.28)',
   },
   white: {
     bg: '#ffffff',
     text: '#283593',
-    time: '#90a4ae',
-    border: '#e8edf6',
-    shadow: '0 1px 4px rgba(0,0,0,0.08)',
+    time: '#64748b',
+    border: '#e2e8f0',
+    shadow: '0 2px 8px rgba(0,0,0,0.06)',
   },
 };
 
@@ -70,15 +71,17 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
   const startT = lesson.start_time || lesson.start || '08:00';
   const endT = lesson.end_time || lesson.end || '09:00';
   const topPx = (toMinutes(startT) / 60) * HOUR_H;
-  const heightPx = Math.max(((toMinutes(endT) - toMinutes(startT)) / 60) * HOUR_H, 28);
+  const rawHeight = ((toMinutes(endT) - toMinutes(startT)) / 60) * HOUR_H;
+  // Ensure enough height to fit title, group, and time neatly without squeezing
+  const heightPx = Math.max(rawHeight, 48);
 
   const isOneTime = lesson.schedule_type === 'date' || (lesson.specific_date && !lesson.is_recurring);
 
   return (
     <div
       onClick={() => onSelect && onSelect(lesson)}
-      className={`absolute left-1 right-1 rounded-lg px-2 py-1 overflow-hidden group cursor-pointer transition-all hover:scale-[1.01] hover:shadow-lg ${
-        isWhite ? 'dark:!bg-slate-800 dark:!border-slate-700' : ''
+      className={`absolute left-1 right-1 rounded-xl p-2 sm:p-2.5 overflow-hidden group cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl hover:z-20 flex flex-col justify-between ${
+        isWhite ? 'dark:!bg-slate-800 dark:!border-slate-700 dark:!text-white' : ''
       }`}
       style={{
         top: `${topPx}px`,
@@ -89,24 +92,32 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
       }}
       title={`Batafsil va o'quvchilar: ${lesson.subject} (${lesson.class_name || 'Guruh'})`}
     >
-      <div className="flex items-start justify-between">
-        <div className="min-w-0 flex items-baseline gap-1 leading-tight flex-wrap">
+      <div className="flex items-start justify-between gap-1 min-w-0">
+        <div className="min-w-0 flex items-center gap-1.5 flex-wrap">
           <span
-            className={`font-bold text-[11px] truncate ${isWhite ? 'dark:!text-white' : ''}`}
+            className={`font-black text-xs sm:text-[13px] leading-tight truncate ${
+              isWhite ? 'dark:!text-white' : ''
+            }`}
             style={{ color: c.text }}
           >
             {lesson.subject}
           </span>
           <span
-            className={`text-[10px] font-medium ${isWhite ? 'dark:!text-slate-400' : ''}`}
-            style={{ color: c.time }}
+            className={`text-[10px] font-bold px-1.5 py-0.5 rounded-md ${
+              isWhite
+                ? 'bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
+                : 'bg-black/20 text-white'
+            }`}
           >
             {lesson.class_name || lesson.cls}
           </span>
           {studentCount > 0 && (
             <span
-              className="text-[8px] font-bold px-1 py-0.5 rounded bg-black/20 flex items-center gap-0.5"
-              style={{ color: c.text }}
+              className={`text-[9px] font-extrabold px-1.5 py-0.5 rounded-md flex items-center gap-0.5 ${
+                isWhite
+                  ? 'bg-indigo-50 dark:bg-indigo-950/60 text-[#3949ab] dark:text-indigo-300'
+                  : 'bg-white/25 text-white'
+              }`}
               title={`${studentCount} nafar o'quvchi`}
             >
               <Users size={9} />
@@ -115,14 +126,14 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
           )}
           {isOneTime && (
             <span
-              className="text-[8px] font-bold px-1 rounded bg-black/15 uppercase tracking-tighter"
-              style={{ color: c.text }}
+              className="text-[8px] font-black px-1.5 py-0.5 rounded bg-black/25 uppercase tracking-tight text-white"
               title="Bir martalik dars"
             >
               sana
             </span>
           )}
         </div>
+
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -130,24 +141,25 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
               onDelete(lesson.id);
             }
           }}
-          className={`opacity-0 group-hover:opacity-100 p-0.5 rounded transition-opacity ${
+          className={`opacity-0 group-hover:opacity-100 p-1 rounded-md transition-opacity hover:bg-black/20 flex-shrink-0 ${
             isWhite ? 'dark:!text-slate-300 dark:hover:!text-red-400' : ''
           }`}
           style={{ color: c.text }}
           title="O'chirish"
         >
-          <Trash2 size={11} />
+          <Trash2 size={12} />
         </button>
       </div>
 
-      {heightPx >= 36 && (
-        <div
-          className={`text-[10px] leading-tight mt-0.5 ${isWhite ? 'dark:!text-slate-400' : ''}`}
-          style={{ color: c.time }}
-        >
-          {startT} · {endT}
-        </div>
-      )}
+      <div
+        className={`flex items-center gap-1 text-[10px] sm:text-[11px] font-semibold opacity-90 truncate mt-1 ${
+          isWhite ? 'dark:!text-slate-300' : ''
+        }`}
+        style={{ color: c.time }}
+      >
+        <Clock size={11} className="flex-shrink-0" />
+        <span>{startT} – {endT}</span>
+      </div>
     </div>
   );
 }
@@ -163,6 +175,7 @@ export default function Timetable() {
   const [editingStudent, setEditingStudent] = useState(null);
   const [studentForm, setStudentForm] = useState({ name: '', phone: '', parent_phone: '', note: '' });
   const [submittingStudent, setSubmittingStudent] = useState(false);
+  const [showGridLines, setShowGridLines] = useState(false);
 
   // New lesson form state
   const [form, setForm] = useState({
@@ -357,14 +370,29 @@ export default function Timetable() {
           </span>
         </div>
 
-        {/* Add lesson button */}
-        <button
-          onClick={() => setShowModal(true)}
-          className="self-start sm:self-auto flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#ef5b5b] text-white text-[12px] font-bold hover:bg-[#e53935] shadow-sm transition-all flex-shrink-0"
-        >
-          <Plus size={14} />
-          <span>Dars qo'shish</span>
-        </button>
+        {/* Action buttons: Grid toggle + Add lesson button */}
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          <button
+            onClick={() => setShowGridLines((prev) => !prev)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+              showGridLines
+                ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800 text-[#3949ab] dark:text-indigo-300'
+                : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700'
+            }`}
+            title="Jadvaldagi chiziqlarni yoqish yoki toza ko'rinishga o'tkazish"
+          >
+            <LayoutGrid size={14} />
+            <span>{showGridLines ? "Chiziqlar: Bor" : "Toza ko'rinish"}</span>
+          </button>
+
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#ef5b5b] text-white text-[12px] font-bold hover:bg-[#e53935] shadow-sm transition-all flex-shrink-0"
+          >
+            <Plus size={14} />
+            <span>Dars qo'shish</span>
+          </button>
+        </div>
       </div>
 
       {/* ── Single scrollable container for both headers and grid ── */}
@@ -436,20 +464,22 @@ export default function Timetable() {
               return (
                 <div
                   key={day.dayIndex}
-                  className="flex-1 relative border-l border-[#e8edf6] dark:border-slate-800"
+                  className={`flex-1 relative border-l border-gray-100 dark:border-slate-800/60 transition-colors ${
+                    isToday ? 'bg-indigo-50/20 dark:bg-indigo-950/20' : ''
+                  }`}
                   style={{
                     height: `${gridH}px`,
-                    background: isToday ? 'rgba(239, 91, 91, 0.04)' : 'transparent',
                   }}
                 >
-                  {/* Hour grid lines */}
-                  {HOURS.map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute left-0 right-0 border-t border-[#edf0f7] dark:border-slate-800/80"
-                      style={{ top: `${i * HOUR_H}px` }}
-                    />
-                  ))}
+                  {/* Hour grid lines (clean toggle: default hidden for spotless look) */}
+                  {showGridLines &&
+                    HOURS.map((_, i) => (
+                      <div
+                        key={i}
+                        className="absolute left-0 right-0 border-t border-dashed border-gray-200/50 dark:border-slate-800/70 pointer-events-none"
+                        style={{ top: `${i * HOUR_H}px` }}
+                      />
+                    ))}
 
                   {/* Lesson cards on this exact day */}
                   {dayLessons.map((lesson) => {

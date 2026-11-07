@@ -268,8 +268,7 @@ export default function SinfDavomati() {
 
   // Date navigation helpers
   const handleDateChange = (offsetDays) => {
-    const [y, m, d] = selectedDate.split('-').map(Number);
-    const date = new Date(y, m - 1, d);
+    const date = parseLocalDate(selectedDate);
     date.setDate(date.getDate() + offsetDays);
     setSelectedDate(formatToDateString(date));
   };
@@ -296,11 +295,16 @@ export default function SinfDavomati() {
   // Format date display (e.g. 3-noyabr, 2026-yil)
   const formattedDateHeader = useMemo(() => {
     try {
-      const [y, m, d] = selectedDate.split('-').map(Number);
-      const monthName = UZ_MONTHS[m - 1] || '';
-      return `${d}-${monthName}, ${y}-yil`;
-    } catch {
+      if (!selectedDate) return '';
+      const parts = String(selectedDate).split('-').map(Number);
+      if (parts.length === 3 && !isNaN(parts[0]) && !isNaN(parts[1]) && !isNaN(parts[2])) {
+        const [y, m, d] = parts;
+        const monthName = UZ_MONTHS[m - 1] || '';
+        return `${d}-${monthName}, ${y}-yil`;
+      }
       return selectedDate;
+    } catch {
+      return selectedDate || '';
     }
   }, [selectedDate]);
 

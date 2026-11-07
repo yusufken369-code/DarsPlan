@@ -97,6 +97,28 @@ export function DataProvider({ children }) {
     const created = await dataService.addLesson(user.id, lessonData);
     if (created) {
       setLessons((prev) => [...prev, created]);
+      // If the lesson specifies a class/group, ensure it exists in classes list
+      if (created.class_name && created.class_name.trim()) {
+        const clsName = created.class_name.trim();
+        setClasses((prev) => {
+          const exists = prev.some(
+            (c) => c.name.toLowerCase().trim() === clsName.toLowerCase()
+          );
+          if (!exists) {
+            return [
+              ...prev,
+              {
+                id: `class_${Date.now()}`,
+                user_id: user.id,
+                name: clsName,
+                room: '',
+                student_count: 0,
+              },
+            ];
+          }
+          return prev;
+        });
+      }
     }
     return created;
   };

@@ -34,14 +34,14 @@ export const MONTHS_UZ = [
 export function parseLocalDate(dateInput) {
   if (!dateInput) return new Date();
   if (dateInput instanceof Date) {
-    return new Date(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate());
+    return new Date(dateInput.getFullYear(), dateInput.getMonth(), dateInput.getDate(), 12, 0, 0);
   }
   if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}/.test(dateInput)) {
     const parts = dateInput.substring(0, 10).split('-').map(Number);
-    return new Date(parts[0], parts[1] - 1, parts[2]);
+    return new Date(parts[0], parts[1] - 1, parts[2], 12, 0, 0);
   }
   const d = new Date(dateInput);
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
 }
 
 /**

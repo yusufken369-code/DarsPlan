@@ -15,6 +15,23 @@ const EMPTY_WORKSPACE = {
 function normalizeWorkspace(ws) {
   if (!ws) return { ...EMPTY_WORKSPACE };
   const res = { ...EMPTY_WORKSPACE, ...ws };
+  if (Array.isArray(res.lessons)) {
+    // If a lesson is 09:30 - 10:30, snap it to 09:00 - 10:00 so it fits cleanly in the table cell
+    res.lessons = res.lessons.map((l) => {
+      const st = l.start_time || l.start;
+      const et = l.end_time || l.end;
+      if (st === '09:30' && et === '10:30') {
+        return {
+          ...l,
+          start_time: '09:00',
+          start: '09:00',
+          end_time: '10:00',
+          end: '10:00',
+        };
+      }
+      return l;
+    });
+  }
   if (Array.isArray(res.students) && Array.isArray(res.classes)) {
     res.students = res.students.map((s) => {
       const sCid = String(s.class_id || '').toLowerCase().trim();
@@ -190,6 +207,38 @@ export const dataService = {
     ws.lessons = (ws.lessons || []).filter((l) => l.id !== lessonId);
     await saveUserWorkspace(userId, ws);
     return true;
+  },
+
+  async updateLesson(userId, lessonId, updates) {
+    if (!userId || !lessonId) return null;
+    try {
+      const { data, error } = await supabase
+        .from('lessons')
+        .update(updates)
+        .eq('id', lessonId)
+        .eq('user_id', userId)
+        .select()
+        .single();
+
+      if (!error && data) {
+        const ws = await getUserWorkspace(userId);
+        ws.lessons = (ws.lessons || []).map((l) => (l.id === lessonId ? { ...l, ...data } : l));
+        await saveUserWorkspace(userId, ws);
+        return data;
+      }
+    } catch {}
+
+    const ws = await getUserWorkspace(userId);
+    let updatedItem = null;
+    ws.lessons = (ws.lessons || []).map((l) => {
+      if (l.id === lessonId) {
+        updatedItem = { ...l, ...updates };
+        return updatedItem;
+      }
+      return l;
+    });
+    await saveUserWorkspace(userId, ws);
+    return updatedItem;
   },
 
   // ── CLASSES ──

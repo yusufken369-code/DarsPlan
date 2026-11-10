@@ -168,7 +168,7 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
 /* ─── Timetable Component ────────────────────────────────────────── */
 export default function Timetable() {
   const navigate = useNavigate();
-  const { lessons, addLesson, deleteLesson, classes, students, addStudent, updateStudent, deleteStudent } = useData();
+  const { lessons, addLesson, updateLesson, deleteLesson, classes, students, addStudent, updateStudent, deleteStudent } = useData();
   const [weekOffset, setWeekOffset] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -781,7 +781,6 @@ export default function Timetable() {
                   {[
                     ['08:00', '09:00'],
                     ['09:00', '10:00'],
-                    ['09:30', '10:30'],
                     ['10:00', '11:00'],
                     ['11:00', '12:00'],
                     ['13:00', '14:00'],
@@ -888,6 +887,74 @@ export default function Timetable() {
 
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto flex flex-col gap-5">
+              {/* Dars vaqti va jadvaldagi katakchaga moslash */}
+              <div className="bg-[#f8fafc] dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/80 rounded-2xl p-4">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-1.5">
+                    <Clock size={15} className="text-[#3949ab] dark:text-indigo-400" />
+                    <span className="text-xs font-bold text-[#283593] dark:text-white">
+                      Dars vaqti: {selectedLesson.start_time || selectedLesson.start} – {selectedLesson.end_time || selectedLesson.end}
+                    </span>
+                  </div>
+                  {((selectedLesson.start_time || selectedLesson.start || '').endsWith(':30') ||
+                    (selectedLesson.end_time || selectedLesson.end || '').endsWith(':30')) && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                      Oraliq dars
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mb-2.5">
+                  Darsni jadval katakchasiga (butun soatlar orasiga) to'liq moslash:
+                </p>
+
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    ['08:00', '09:00'],
+                    ['09:00', '10:00'],
+                    ['10:00', '11:00'],
+                    ['11:00', '12:00'],
+                    ['13:00', '14:00'],
+                    ['14:00', '15:00'],
+                    ['15:00', '16:00'],
+                  ].map(([st, et]) => {
+                    const isCur =
+                      (selectedLesson.start_time || selectedLesson.start) === st &&
+                      (selectedLesson.end_time || selectedLesson.end) === et;
+                    return (
+                      <button
+                        key={`${st}-${et}`}
+                        type="button"
+                        onClick={async () => {
+                          const updated = await updateLesson(selectedLesson.id, {
+                            start_time: st,
+                            start: st,
+                            end_time: et,
+                            end: et,
+                          });
+                          if (updated) {
+                            setSelectedLesson((prev) => ({
+                              ...prev,
+                              start_time: st,
+                              start: st,
+                              end_time: et,
+                              end: et,
+                            }));
+                          }
+                        }}
+                        className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
+                          isCur
+                            ? 'bg-[#3949ab] text-white border-[#3949ab] font-bold shadow-sm'
+                            : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:border-[#3949ab]'
+                        }`}
+                      >
+                        {st} – {et}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* Add Student Form */}
               <div className="bg-[#f0f4ff] dark:bg-slate-900/60 border border-indigo-100 dark:border-slate-700 rounded-2xl p-4">
                 <h4 className="text-xs font-bold text-[#283593] dark:text-white flex items-center gap-1.5 mb-2.5">

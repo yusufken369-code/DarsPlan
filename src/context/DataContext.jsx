@@ -132,6 +132,17 @@ export function DataProvider({ children }) {
     return ok;
   };
 
+  const updateLesson = async (lessonId, updates) => {
+    if (!user?.id) return;
+    const updated = await dataService.updateLesson(user.id, lessonId, updates);
+    if (updated) {
+      setLessons((prev) =>
+        prev.map((l) => (l.id === lessonId ? { ...l, ...updated } : l))
+      );
+    }
+    return updated;
+  };
+
   const addClass = async (classData) => {
     if (!user?.id) return;
     const created = await dataService.addClass(user.id, classData);
@@ -290,6 +301,7 @@ export function DataProvider({ children }) {
     students,
     loadingData,
     addLesson,
+    updateLesson,
     deleteLesson,
     addClass,
     deleteClass,

@@ -81,7 +81,7 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
   return (
     <div
       onClick={() => onSelect && onSelect(lesson)}
-      className={`absolute left-1 right-1 rounded-xl p-2 sm:p-2.5 overflow-hidden group cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl hover:z-20 flex flex-col justify-between ${
+      className={`absolute left-1 right-1 rounded-xl p-2 sm:p-2.5 overflow-hidden group cursor-pointer transition-all hover:scale-[1.02] hover:shadow-xl z-10 hover:z-20 flex flex-col justify-between ${
         isWhite ? 'dark:!bg-slate-800 dark:!border-slate-700 dark:!text-white' : ''
       }`}
       style={{
@@ -176,7 +176,24 @@ export default function Timetable() {
   const [editingStudent, setEditingStudent] = useState(null);
   const [studentForm, setStudentForm] = useState({ name: '', phone: '', parent_phone: '', note: '' });
   const [submittingStudent, setSubmittingStudent] = useState(false);
-  const [showGridLines, setShowGridLines] = useState(false);
+  const [showGridLines, setShowGridLines] = useState(() => {
+    try {
+      const saved = localStorage.getItem('darsplan_show_grid');
+      return saved !== null ? saved === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleGridLines = () => {
+    setShowGridLines((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('darsplan_show_grid', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // New lesson form state
   const [form, setForm] = useState({
@@ -376,7 +393,7 @@ export default function Timetable() {
         {/* Action buttons: Grid toggle + Add lesson button */}
         <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
           <button
-            onClick={() => setShowGridLines((prev) => !prev)}
+            onClick={toggleGridLines}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
               showGridLines
                 ? 'bg-indigo-50 dark:bg-indigo-950/60 border-indigo-200 dark:border-indigo-800 text-[#3949ab] dark:text-indigo-300'
@@ -438,7 +455,7 @@ export default function Timetable() {
           </div>
 
           {/* Grid (All 7 days) */}
-          <div className="flex relative">
+          <div className="flex relative bg-white/70 dark:bg-slate-900/40 rounded-xl border border-slate-200 dark:border-slate-800/80 shadow-2xs">
             {/* Time labels column */}
             <div className="w-10 sm:w-11 flex-shrink-0 relative" style={{ height: `${gridH}px` }}>
               {HOURS.map((h, i) => (
@@ -447,7 +464,7 @@ export default function Timetable() {
                   className="absolute right-2 text-right"
                   style={{ top: `${i * HOUR_H - 7}px` }}
                 >
-                  <span className="text-[10px] font-medium text-[#b0bec5] dark:text-slate-500">{h}</span>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400">{h}</span>
                 </div>
               ))}
             </div>
@@ -467,22 +484,34 @@ export default function Timetable() {
               return (
                 <div
                   key={day.dayIndex}
-                  className={`flex-1 relative border-l border-gray-100 dark:border-slate-800/60 transition-colors ${
-                    isToday ? 'bg-indigo-50/20 dark:bg-indigo-950/20' : ''
+                  className={`flex-1 relative border-l border-slate-200 dark:border-slate-800/80 transition-colors ${
+                    isToday ? 'bg-indigo-50/25 dark:bg-indigo-950/25' : ''
                   }`}
                   style={{
                     height: `${gridH}px`,
                   }}
                 >
-                  {/* Hour grid lines (clean toggle: default hidden for spotless look) */}
-                  {showGridLines &&
-                    HOURS.map((_, i) => (
-                      <div
-                        key={i}
-                        className="absolute left-0 right-0 border-t border-dashed border-gray-200/50 dark:border-slate-800/70 pointer-events-none"
-                        style={{ top: `${i * HOUR_H}px` }}
-                      />
-                    ))}
+                  {/* Grid lines (Whole hour line + 30-min dashed line for exact :30 lesson framing) */}
+                  {showGridLines && (
+                    <>
+                      {HOURS.map((_, i) => (
+                        <React.Fragment key={i}>
+                          {/* Whole hour solid line */}
+                          <div
+                            className="absolute left-0 right-0 border-t border-slate-300 dark:border-slate-700/80 pointer-events-none"
+                            style={{ top: `${i * HOUR_H}px` }}
+                          />
+                          {/* Half hour (30-min) dashed line */}
+                          {i < HOURS.length - 1 && (
+                            <div
+                              className="absolute left-0 right-0 border-t border-dashed border-slate-200 dark:border-slate-800/70 pointer-events-none"
+                              style={{ top: `${i * HOUR_H + (HOUR_H / 2)}px` }}
+                            />
+                          )}
+                        </React.Fragment>
+                      ))}
+                    </>
+                  )}
 
                   {/* Lesson cards on this exact day */}
                   {dayLessons.map((lesson) => {
@@ -740,6 +769,41 @@ export default function Timetable() {
                     onChange={(e) => setForm({ ...form, end_time: e.target.value })}
                     className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
                   />
+                </div>
+              </div>
+
+              {/* Tezkor vaqt oraliqlari */}
+              <div>
+                <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">
+                  Tezkor vaqt oraliqlari (jadval katakchalariga to'liq mos):
+                </label>
+                <div className="flex flex-wrap gap-1.5">
+                  {[
+                    ['08:00', '09:00'],
+                    ['09:00', '10:00'],
+                    ['09:30', '10:30'],
+                    ['10:00', '11:00'],
+                    ['11:00', '12:00'],
+                    ['13:00', '14:00'],
+                    ['14:00', '15:00'],
+                    ['15:00', '16:00'],
+                  ].map(([st, et]) => {
+                    const isSelected = form.start_time === st && form.end_time === et;
+                    return (
+                      <button
+                        key={`${st}-${et}`}
+                        type="button"
+                        onClick={() => setForm({ ...form, start_time: st, end_time: et })}
+                        className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
+                          isSelected
+                            ? 'bg-[#3949ab] text-white border-[#3949ab] font-bold shadow-sm'
+                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#3949ab]'
+                        }`}
+                      >
+                        {st} – {et}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 

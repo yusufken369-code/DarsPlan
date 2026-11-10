@@ -157,3 +157,54 @@ export function getWeekRangeLabel(days) {
   }
   return `${first.getDate()} – ${last.getDate()}-${firstMonth}, ${first.getFullYear()}`;
 }
+
+
+/**
+ * Reliably matches a student to a class or group by cross-referencing:
+ * 1. Direct match with student's class_id or group_name
+ * 2. Lookup in classes table by ID or Name
+ */
+export function isStudentInClass(student, classIdentifier, classes = []) {
+  if (!student || !classIdentifier) return false;
+  const target = String(classIdentifier).toLowerCase().trim();
+
+  // Find if classIdentifier refers to a known class object in classes
+  const matchedClass = (classes || []).find(
+    (c) =>
+      String(c.id).toLowerCase().trim() === target ||
+      String(c.name || '').toLowerCase().trim() === target
+  );
+
+  // All valid identifiers representing this target class
+  const validTargets = new Set([target]);
+  if (matchedClass) {
+    if (matchedClass.id) validTargets.add(String(matchedClass.id).toLowerCase().trim());
+    if (matchedClass.name) validTargets.add(String(matchedClass.name).toLowerCase().trim());
+  }
+
+  // Student's identifiers
+  const sClassId = String(student.class_id || '').toLowerCase().trim();
+  const sGroupName = String(student.group_name || '').toLowerCase().trim();
+
+  if (validTargets.has(sClassId) || validTargets.has(sGroupName)) {
+    return true;
+  }
+
+  // If student.class_id points to an id in classes, check that class's name
+  if (sClassId) {
+    const sClass = (classes || []).find((c) => String(c.id).toLowerCase().trim() === sClassId);
+    if (sClass && validTargets.has(String(sClass.name || '').toLowerCase().trim())) {
+      return true;
+    }
+  }
+
+  // If student.group_name points to an id in classes, check that class's name
+  if (sGroupName) {
+    const sClass = (classes || []).find((c) => String(c.id).toLowerCase().trim() === sGroupName);
+    if (sClass && validTargets.has(String(sClass.name || '').toLowerCase().trim())) {
+      return true;
+    }
+  }
+
+  return false;
+}

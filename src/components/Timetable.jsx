@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -26,6 +26,7 @@ import {
   getWeekRangeLabel,
   formatToDateString,
   parseLocalDate,
+  isStudentInClass,
 } from '../utils/dateUtils';
 
 /* ─── Time grid constants ───────────────────────────────────────── */
@@ -167,7 +168,7 @@ function LessonCard({ lesson, onDelete, onSelect, studentCount }) {
 /* ─── Timetable Component ────────────────────────────────────────── */
 export default function Timetable() {
   const navigate = useNavigate();
-  const { lessons, addLesson, deleteLesson, students, addStudent, updateStudent, deleteStudent } = useData();
+  const { lessons, addLesson, deleteLesson, classes, students, addStudent, updateStudent, deleteStudent } = useData();
   const [weekOffset, setWeekOffset] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -303,9 +304,15 @@ export default function Timetable() {
 
     setSubmittingStudent(true);
     const grp = selectedLesson.class_name || selectedLesson.cls || '1-guruh';
+    const target = grp.toLowerCase().trim();
+    const matched = (classes || []).find(
+      (c) => String(c.id).toLowerCase().trim() === target ||
+             String(c.name || '').toLowerCase().trim() === target
+    );
+
     await addStudent({
-      class_id: grp,
-      group_name: grp,
+      class_id: matched ? matched.id : grp,
+      group_name: matched ? matched.name : grp,
       name: studentForm.name.trim(),
       phone: studentForm.phone.trim(),
       parent_phone: studentForm.parent_phone.trim(),
@@ -315,15 +322,11 @@ export default function Timetable() {
     setStudentForm({ name: '', phone: '', parent_phone: '', note: '' });
   };
 
-  const currentGroupStudents = selectedLesson
-    ? (students || []).filter((s) => {
-        const grp = String(selectedLesson.class_name || selectedLesson.cls || '').toLowerCase().trim();
-        return (
-          String(s.class_id || '').toLowerCase().trim() === grp ||
-          String(s.group_name || '').toLowerCase().trim() === grp
-        );
-      })
-    : [];
+  const currentGroupStudents = useMemo(() => {
+    if (!selectedLesson) return [];
+    const grp = selectedLesson.class_name || selectedLesson.cls || '';
+    return (students || []).filter((s) => isStudentInClass(s, grp, classes));
+  }, [selectedLesson, students, classes]);
 
   const isEmpty = (lessons || []).length === 0;
 
@@ -483,11 +486,9 @@ export default function Timetable() {
 
                   {/* Lesson cards on this exact day */}
                   {dayLessons.map((lesson) => {
-                    const grp = String(lesson.class_name || lesson.cls || '').toLowerCase().trim();
-                    const stdCount = (students || []).filter(
-                      (s) =>
-                        String(s.class_id || '').toLowerCase().trim() === grp ||
-                        String(s.group_name || '').toLowerCase().trim() === grp
+                    const grp = lesson.class_name || lesson.cls || '';
+                    const stdCount = (students || []).filter((s) =>
+                      isStudentInClass(s, grp, classes)
                     ).length;
 
                     return (
@@ -1001,7 +1002,12 @@ export default function Timetable() {
                   type="button"
                   onClick={() => {
                     const grp = selectedLesson.class_name || selectedLesson.cls || '1-guruh';
-                    navigate(`/sinflar/${grp}`);
+                    const target = grp.toLowerCase().trim();
+                    const matched = (classes || []).find(
+                      (c) => String(c.id).toLowerCase().trim() === target ||
+                             String(c.name || '').toLowerCase().trim() === target
+                    );
+                    navigate(`/sinflar/${matched ? matched.id : encodeURIComponent(grp)}`);
                   }}
                   className="px-3.5 py-1.5 rounded-xl bg-[#3949ab] hover:bg-[#303f9f] text-white text-xs font-bold transition-colors shadow-xs flex items-center gap-1.5"
                 >

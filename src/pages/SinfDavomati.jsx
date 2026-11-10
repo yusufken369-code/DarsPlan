@@ -19,7 +19,7 @@ import {
   X,
 } from 'lucide-react';
 import { useData } from '../context/DataContext';
-import { formatToDateString } from '../utils/dateUtils';
+import { formatToDateString, parseLocalDate, isStudentInClass } from '../utils/dateUtils';
 import StudentEditModal, { GRADE_CONFIG } from '../components/StudentEditModal';
 
 /* ── ATTENDANCE CODE CONFIGURATION ── */
@@ -100,14 +100,9 @@ export default function SinfDavomati() {
   // Students in this specific class / group
   const classStudents = useMemo(() => {
     if (!currentClass) return [];
-    const targetId = String(currentClass.id).toLowerCase().trim();
-    const targetName = String(currentClass.name || '').toLowerCase().trim();
-    return (students || []).filter((s) => {
-      const cid = String(s.class_id || '').toLowerCase().trim();
-      const gname = String(s.group_name || '').toLowerCase().trim();
-      return cid === targetId || cid === targetName || gname === targetId || gname === targetName;
-    });
-  }, [students, currentClass]);
+    const identifier = currentClass.id || currentClass.name;
+    return (students || []).filter((s) => isStudentInClass(s, identifier, classes));
+  }, [students, currentClass, classes]);
 
   // Attendance & grades dictionary for this date:
   // { [studentId]: { status: 'B'|'Y'|'K'|'S'|null, grade: 2..5|null, comment: string } }

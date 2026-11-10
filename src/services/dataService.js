@@ -11,6 +11,34 @@ const EMPTY_WORKSPACE = {
   attendance: [],
 };
 
+// Helper to normalize and cross-link student records with classes
+function normalizeWorkspace(ws) {
+  if (!ws) return { ...EMPTY_WORKSPACE };
+  const res = { ...EMPTY_WORKSPACE, ...ws };
+  if (Array.isArray(res.students) && Array.isArray(res.classes)) {
+    res.students = res.students.map((s) => {
+      const sCid = String(s.class_id || '').toLowerCase().trim();
+      const sGname = String(s.group_name || '').toLowerCase().trim();
+      const cls = res.classes.find(
+        (c) =>
+          String(c.id).toLowerCase().trim() === sCid ||
+          String(c.name || '').toLowerCase().trim() === sCid ||
+          String(c.id).toLowerCase().trim() === sGname ||
+          String(c.name || '').toLowerCase().trim() === sGname
+      );
+      if (cls) {
+        return {
+          ...s,
+          class_id: cls.id,
+          group_name: cls.name,
+        };
+      }
+      return s;
+    });
+  }
+  return res;
+}
+
 // Helper to get user-specific workspace data
 async function getUserWorkspace(userId) {
   if (!userId) return { ...EMPTY_WORKSPACE };
@@ -22,7 +50,7 @@ async function getUserWorkspace(userId) {
     const cached = localStorage.getItem(storageKey);
     if (cached) {
       const parsed = JSON.parse(cached);
-      return { ...EMPTY_WORKSPACE, ...parsed };
+      return normalizeWorkspace(parsed);
     }
   } catch (err) {
     console.warn('Local storage read warning:', err);
@@ -33,7 +61,7 @@ async function getUserWorkspace(userId) {
     const { data: { user } } = await supabase.auth.getUser();
     if (user && user.id === userId && user.user_metadata?.darsplan_workspace) {
       const cloudData = user.user_metadata.darsplan_workspace;
-      const merged = { ...EMPTY_WORKSPACE, ...cloudData };
+      const merged = normalizeWorkspace(cloudData);
       // Cache locally for fast subsequent reads
       try {
         localStorage.setItem(storageKey, JSON.stringify(merged));
@@ -447,12 +475,21 @@ export const dataService = {
 
   async addStudent(userId, student) {
     if (!userId || !student.name) return null;
-    const groupVal = student.group_name || student.class_name || student.class_id || '';
+    const ws = await getUserWorkspace(userId);
+
+    const rawTarget = String(student.class_id || student.group_name || student.class_name || '').trim();
+    const target = rawTarget.toLowerCase();
+    const matchedCls = (ws.classes || []).find(
+      (c) => String(c.id).toLowerCase().trim() === target || String(c.name || '').toLowerCase().trim() === target
+    );
+    const finalClassId = matchedCls ? matchedCls.id : (student.class_id || rawTarget);
+    const finalGroupName = matchedCls ? matchedCls.name : (student.group_name || student.class_name || rawTarget);
+
     const newStudent = {
       id: crypto.randomUUID ? crypto.randomUUID() : `std_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       user_id: userId,
-      class_id: student.class_id || groupVal,
-      group_name: groupVal,
+      class_id: finalClassId,
+      group_name: finalGroupName,
       name: student.name.trim(),
       phone: student.phone ? student.phone.trim() : '',
       parent_phone: student.parent_phone ? student.parent_phone.trim() : '',
@@ -475,23 +512,24 @@ export const dataService = {
         .select()
         .single();
       if (!error && data) {
-        return data;
+        // Also persist into local workspace
+        ws.students = [...(ws.students || []), { ...newStudent, ...data }];
+        await saveUserWorkspace(userId, ws);
+        return { ...newStudent, ...data };
       }
     } catch {}
 
-    const ws = await getUserWorkspace(userId);
     ws.students = [...(ws.students || []), newStudent];
     // Sync class student count if class exists
-    if (ws.classes && groupVal) {
-      const target = groupVal.toLowerCase().trim();
-      const cls = ws.classes.find(
-        (c) => c.id === groupVal || c.name.toLowerCase().trim() === target
+    if (ws.classes && (matchedCls || rawTarget)) {
+      const cls = matchedCls || ws.classes.find(
+        (c) => c.id === finalClassId || c.name.toLowerCase().trim() === target
       );
       if (cls) {
         cls.student_count = ws.students.filter(
           (s) =>
             s.class_id === cls.id ||
-            String(s.group_name || '').toLowerCase().trim() === target
+            String(s.group_name || '').toLowerCase().trim() === cls.name.toLowerCase().trim()
         ).length;
       }
     }

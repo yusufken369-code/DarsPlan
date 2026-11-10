@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Users, Plus, Trash2, X, School, ClipboardCheck, ArrowRight } from 'lucide-react';
 import { useData } from '../context/DataContext';
+import { isStudentInClass } from '../utils/dateUtils';
 
 export default function Sinflar() {
   const navigate = useNavigate();
@@ -75,7 +76,7 @@ export default function Sinflar() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {classes.map((cls) => {
-              const classStds = (students || []).filter((s) => s.class_id === cls.id);
+              const classStds = (students || []).filter((s) => isStudentInClass(s, cls.id, classes));
               const count = classStds.length > 0 ? classStds.length : (cls.student_count || 0);
 
               return (

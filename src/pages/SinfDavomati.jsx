@@ -152,15 +152,30 @@ export default function SinfDavomati() {
       try {
         const data = await getAttendance(currentClass.id, selectedDate, currentClass.name);
         if (isMounted) {
-          if (data && data.records) {
-            setRecords(data.records);
+          if (data && data.records && Object.keys(data.records).length > 0) {
+            const hasAnyStatus = Object.values(data.records).some((r) => r && r.status);
+            if (!hasAnyStatus) {
+              // Agar bu sana uchun davomat olinmagan bo'lsa, o'tgan kundan ko'chib qolgan baholarni tozalaymiz
+              const cleaned = {};
+              classStudents.forEach((std) => {
+                const existing = data.records[std.id];
+                cleaned[std.id] = {
+                  status: null,
+                  grade: null,
+                  comment: existing?.comment || '',
+                };
+              });
+              setRecords(cleaned);
+            } else {
+              setRecords(data.records);
+            }
           } else {
-            // Default: if no records for this date yet, preserve any student's general grade and set status to null
+            // Yangi sana uchun toza boshlash: hech qanday baho yoki status o'tgan kundan olinmaydi
             const initial = {};
             classStudents.forEach((std) => {
               initial[std.id] = {
                 status: null,
-                grade: std.grade ? Number(std.grade) : null,
+                grade: null,
                 comment: '',
               };
             });
@@ -201,10 +216,12 @@ export default function SinfDavomati() {
     setRecords((prev) => {
       const current = prev[studentId] || { status: null, grade: null, comment: '' };
       const nextGrade = current.grade === gradeNum ? null : gradeNum;
+      const nextStatus = nextGrade && !current.status ? 'B' : current.status;
       const updated = {
         ...prev,
         [studentId]: {
           ...current,
+          status: nextStatus,
           grade: nextGrade,
         },
       };

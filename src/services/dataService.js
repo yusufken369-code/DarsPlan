@@ -53,6 +53,31 @@ function normalizeWorkspace(ws) {
       return s;
     });
   }
+
+  // Clean up any accidentally auto-propagated grades on dates where no attendance was marked (status is null for everyone)
+  if (Array.isArray(res.attendance)) {
+    res.attendance = res.attendance.map((att) => {
+      if (att && att.records && typeof att.records === 'object') {
+        const cleaned = { ...att.records };
+        const hasAnyAttendance = Object.values(cleaned).some((r) => r && r.status);
+        if (!hasAnyAttendance) {
+          // If no student has attendance status on this date, grades should not be pre-filled
+          let changed = false;
+          Object.keys(cleaned).forEach((k) => {
+            if (cleaned[k] && cleaned[k].grade) {
+              cleaned[k] = { ...cleaned[k], grade: null };
+              changed = true;
+            }
+          });
+          if (changed) {
+            return { ...att, records: cleaned };
+          }
+        }
+      }
+      return att;
+    });
+  }
+
   return res;
 }
 

@@ -34,6 +34,18 @@ const HOURS = ['8:00', '9:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:
 const HOUR_H = 64; // px per hour (generous spacing for lesson cards)
 const GRID_START_H = 8; // 8:00
 
+export const TIME_OPTIONS = [
+  '08:00', '08:30', '08:45',
+  '09:00', '09:30', '09:45',
+  '10:00', '10:30', '10:45',
+  '11:00', '11:30', '11:45',
+  '12:00', '12:30', '12:45',
+  '13:00', '13:30', '13:45',
+  '14:00', '14:30', '14:45',
+  '15:00', '15:30', '15:45',
+  '16:00', '16:30', '17:00', '17:30', '18:00',
+];
+
 function toMinutes(t) {
   if (!t) return 0;
   const [h, m = 0] = t.split(':').map(Number);
@@ -203,7 +215,7 @@ export default function Timetable() {
     selectedDays: [0, 2, 4], // default: Dushanba / Chorshanba / Juma
     specific_date: formatToDateString(new Date()),
     start_time: '08:00',
-    end_time: '09:15',
+    end_time: '09:00',
     color: 'navy',
   });
 
@@ -305,7 +317,7 @@ export default function Timetable() {
       selectedDays: [0, 2, 4],
       specific_date: formatToDateString(new Date()),
       start_time: '08:00',
-      end_time: '09:15',
+      end_time: '09:00',
       color: 'navy',
     });
 
@@ -745,39 +757,12 @@ export default function Timetable() {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
-                    Boshlanish
-                  </label>
-                  <input
-                    type="time"
-                    required
-                    value={form.start_time}
-                    onChange={(e) => setForm({ ...form, start_time: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
-                    Tugash
-                  </label>
-                  <input
-                    type="time"
-                    required
-                    value={form.end_time}
-                    onChange={(e) => setForm({ ...form, end_time: e.target.value })}
-                    className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-[#f7f9fc] dark:bg-slate-900"
-                  />
-                </div>
-              </div>
-
-              {/* Tezkor vaqt oraliqlari */}
+              {/* Dars vaqti tanlash */}
               <div>
-                <label className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">
-                  Tezkor vaqt oraliqlari (jadval katakchalariga to'liq mos):
+                <label className="text-xs font-semibold text-[#455a7a] dark:text-slate-300 mb-1.5 block">
+                  Dars vaqti (Tezkor tanlash — 1 marta bosish bilan):
                 </label>
-                <div className="flex flex-wrap gap-1.5">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
                   {[
                     ['08:00', '09:00'],
                     ['09:00', '10:00'],
@@ -793,16 +778,70 @@ export default function Timetable() {
                         key={`${st}-${et}`}
                         type="button"
                         onClick={() => setForm({ ...form, start_time: st, end_time: et })}
-                        className={`text-[11px] px-2.5 py-1 rounded-lg border transition-all ${
+                        className={`text-xs py-2 px-2 rounded-xl border font-bold transition-all flex items-center justify-center gap-1 ${
                           isSelected
-                            ? 'bg-[#3949ab] text-white border-[#3949ab] font-bold shadow-sm'
-                            : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-[#3949ab]'
+                            ? 'bg-[#3949ab] text-white border-[#3949ab] shadow-sm ring-2 ring-[#3949ab]/30'
+                            : 'bg-[#f7f9fc] dark:bg-slate-900 text-slate-700 dark:text-slate-300 border-gray-200 dark:border-slate-700 hover:border-[#3949ab] hover:bg-white'
                         }`}
                       >
                         {st} – {et}
                       </button>
                     );
                   })}
+                </div>
+              </div>
+
+              {/* Boshqa vaqt tanlash (Boshlanish va Tugash) */}
+              <div className="bg-[#f8fafc] dark:bg-slate-900/60 border border-gray-200/80 dark:border-slate-700/80 rounded-2xl p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-bold text-slate-600 dark:text-slate-300">
+                    Yoki aniq vaqtni tanlang:
+                  </span>
+                  <span className="text-[11px] font-bold text-[#3949ab] dark:text-indigo-400">
+                    Tanlandi: {form.start_time} – {form.end_time}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
+                      Boshlanish
+                    </label>
+                    <select
+                      value={form.start_time}
+                      onChange={(e) => {
+                        const newStart = e.target.value;
+                        const [h, m] = newStart.split(':').map(Number);
+                        const endH = Math.min(h + 1, 18);
+                        const newEnd = `${String(endH).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+                        setForm({ ...form, start_time: newStart, end_time: newEnd });
+                      }}
+                      className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-semibold text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-800 cursor-pointer"
+                    >
+                      {TIME_OPTIONS.filter((t) => t < '18:00').map((t) => (
+                        <option key={`start-${t}`} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] font-semibold text-[#455a7a] dark:text-slate-300 mb-1 block">
+                      Tugash
+                    </label>
+                    <select
+                      value={form.end_time}
+                      onChange={(e) => setForm({ ...form, end_time: e.target.value })}
+                      className="w-full h-10 px-3 rounded-xl border border-gray-200 dark:border-slate-700 text-xs font-semibold text-[#283593] dark:text-white focus:border-[#3949ab] focus:outline-none bg-white dark:bg-slate-800 cursor-pointer"
+                    >
+                      {TIME_OPTIONS.filter((t) => t > form.start_time).map((t) => (
+                        <option key={`end-${t}`} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 

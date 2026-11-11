@@ -340,7 +340,7 @@ export default function SinfDavomati() {
   }
 
   return (
-    <div className="flex flex-col gap-5 max-w-7xl mx-auto pb-16 select-none animate-in fade-in duration-150">
+    <div className="flex flex-col gap-5 w-full pb-16 select-none animate-in fade-in duration-150">
       {/* ── TOP HEADER: Back button + Title + Date Picker Card (Like user image) ── */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Left: Back & Class information */}

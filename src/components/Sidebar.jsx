@@ -8,7 +8,6 @@ import {
   Folder,
   ClipboardCheck,
   Settings,
-  LayoutGrid,
 } from 'lucide-react';
 
 const NAV = [
@@ -73,13 +72,6 @@ export default function Sidebar() {
           {BOTTOM_NAV.map(item => (
             <SideIcon key={item.to} {...item} />
           ))}
-          {/* Grid/apps icon (decorative, matches screenshot) */}
-          <button
-            title="Ilovalar"
-            className="flex items-center justify-center w-10 h-10 rounded-xl text-[#b0bec5] dark:text-slate-500 hover:bg-[#f0f4ff] dark:hover:bg-slate-800 hover:text-[#3949ab] dark:hover:text-indigo-400 transition-colors mt-2"
-          >
-            <LayoutGrid size={19} />
-          </button>
         </div>
       </aside>
 

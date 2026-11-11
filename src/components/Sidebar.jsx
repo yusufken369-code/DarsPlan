@@ -5,18 +5,16 @@ import {
   Calendar,
   BookOpen,
   Users,
-  Folder,
-  ClipboardCheck,
+  BarChart3,
   Settings,
 } from 'lucide-react';
 
 const NAV = [
   { to: '/',            icon: Home,           label: 'Bosh sahifa',       end: true },
   { to: '/jadval',      icon: Calendar,       label: 'Dars jadvali' },
-  { to: '/rejalar',     icon: BookOpen,       label: 'Dars rejalari' },
   { to: '/sinflar',     icon: Users,          label: 'Sinflar' },
-  { to: '/materiallar', icon: Folder,         label: "O'quv materiallari" },
-  { to: '/vazifalar',   icon: ClipboardCheck, label: 'Vazifalar' },
+  { to: '/jurnal',      icon: BookOpen,       label: 'Baholar jurnali' },
+  { to: '/hisobotlar',  icon: BarChart3,      label: 'Hisobotlar va Tahlil' },
 ];
 
 const BOTTOM_NAV = [
@@ -93,10 +91,9 @@ export default function Sidebar() {
             <span className="text-[9px] mt-0.5 leading-none">
               {item.label === 'Bosh sahifa' ? 'Bosh' :
                item.label === 'Dars jadvali' ? 'Jadval' :
-               item.label === 'Dars rejalari' ? 'Rejalar' :
                item.label === 'Sinflar' ? 'Sinflar' :
-               item.label === "O'quv materiallari" ? 'Material' :
-               item.label === 'Vazifalar' ? 'Vazifa' : 'Sozlama'}
+               item.label === 'Baholar jurnali' ? 'Jurnal' :
+               item.label === 'Hisobotlar va Tahlil' ? 'Hisobot' : 'Sozlama'}
             </span>
           </NavLink>
         ))}

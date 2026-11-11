@@ -34,6 +34,7 @@ export function DataProvider({ children }) {
   const [assignments, setAssignments] = useState([]);
   const [lessonPlans, setLessonPlans] = useState([]);
   const [students, setStudents] = useState([]);
+  const [attendanceList, setAttendanceList] = useState([]);
   const [loadingData, setLoadingData] = useState(true);
 
   const loadUserData = useCallback(async (userId) => {
@@ -44,19 +45,21 @@ export function DataProvider({ children }) {
       setAssignments([]);
       setLessonPlans([]);
       setStudents([]);
+      setAttendanceList([]);
       setLoadingData(false);
       return;
     }
 
     setLoadingData(true);
     try {
-      const [l, c, m, a, p, s] = await Promise.all([
+      const [l, c, m, a, p, s, att] = await Promise.all([
         dataService.getLessons(userId),
         dataService.getClasses(userId),
         dataService.getMaterials(userId),
         dataService.getAssignments(userId),
         dataService.getLessonPlans(userId),
         dataService.getStudents(userId),
+        dataService.getAllAttendance(userId),
       ]);
       setLessons(l || []);
       setClasses(c || []);
@@ -64,6 +67,7 @@ export function DataProvider({ children }) {
       setAssignments(a || []);
       setLessonPlans(p || []);
       setStudents(s || []);
+      setAttendanceList(att || []);
     } catch (err) {
       console.error('Error loading user data:', err);
       setLessons([]);
@@ -72,6 +76,7 @@ export function DataProvider({ children }) {
       setAssignments([]);
       setLessonPlans([]);
       setStudents([]);
+      setAttendanceList([]);
     } finally {
       setLoadingData(false);
     }
@@ -88,6 +93,7 @@ export function DataProvider({ children }) {
       setAssignments([]);
       setLessonPlans([]);
       setStudents([]);
+      setAttendanceList([]);
       setLoadingData(false);
     }
   }, [user?.id, loadUserData]);
@@ -272,16 +278,30 @@ export function DataProvider({ children }) {
   const saveAttendance = async (classId, date, records, className = '') => {
     if (!user?.id) return false;
     const res = await dataService.saveAttendance(user.id, classId, date, records, className);
-    if (res && records) {
-      // Sync in-memory student grades
-      setStudents((prev) =>
-        prev.map((s) => {
-          if (records[s.id] && records[s.id].grade) {
-            return { ...s, grade: Number(records[s.id].grade) };
-          }
-          return s;
-        })
-      );
+    if (res) {
+      setAttendanceList((prev) => {
+        const idx = prev.findIndex(
+          (a) => a.id === res.id || (String(a.class_id) === String(classId) && a.date === date)
+        );
+        if (idx >= 0) {
+          const cp = [...prev];
+          cp[idx] = res;
+          return cp;
+        }
+        return [...prev, res];
+      });
+
+      if (records) {
+        // Sync in-memory student grades
+        setStudents((prev) =>
+          prev.map((s) => {
+            if (records[s.id] && records[s.id].grade) {
+              return { ...s, grade: Number(records[s.id].grade) };
+            }
+            return s;
+          })
+        );
+      }
     }
     return res;
   };
@@ -299,6 +319,7 @@ export function DataProvider({ children }) {
     assignments,
     lessonPlans,
     students,
+    attendanceList,
     loadingData,
     addLesson,
     updateLesson,

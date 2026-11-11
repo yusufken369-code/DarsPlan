@@ -6,11 +6,10 @@ import Sidebar from './components/Sidebar';
 import Header from './components/Header';
 import Dashboard from './pages/Dashboard';
 import DarsJadvali from './pages/DarsJadvali';
-import DarsRejalari from './pages/DarsRejalari';
 import Sinflar from './pages/Sinflar';
 import SinfDavomati from './pages/SinfDavomati';
-import Materiallar from './pages/Materiallar';
-import Vazifalar from './pages/Vazifalar';
+import Jurnal from './pages/Jurnal';
+import Hisobotlar from './pages/Hisobotlar';
 import Sozlamalar from './pages/Sozlamalar';
 import SignUp from './pages/SignUp';
 import Login from './pages/Login';
@@ -78,12 +77,16 @@ function DashboardLayout() {
           <Routes>
             <Route path="/"            element={<Dashboard />} />
             <Route path="/jadval"      element={<DarsJadvali />} />
-            <Route path="/rejalar"     element={<DarsRejalari />} />
             <Route path="/sinflar"             element={<Sinflar />} />
             <Route path="/sinflar/:classId"    element={<SinfDavomati />} />
-            <Route path="/materiallar"         element={<Materiallar />} />
-            <Route path="/vazifalar"   element={<Vazifalar />} />
+            <Route path="/jurnal"      element={<Jurnal />} />
+            <Route path="/hisobotlar"  element={<Hisobotlar />} />
             <Route path="/sozlamalar"  element={<Sozlamalar />} />
+
+            {/* Eski yo'nalishlar uchun avtomatik yo'naltirish */}
+            <Route path="/rejalar"     element={<Navigate to="/jurnal" replace />} />
+            <Route path="/materiallar" element={<Navigate to="/hisobotlar" replace />} />
+            <Route path="/vazifalar"   element={<Navigate to="/jurnal" replace />} />
             <Route path="*"            element={<Navigate to="/" replace />} />
           </Routes>
         </main>

@@ -757,4 +757,10 @@ export const dataService = {
     await saveUserWorkspace(userId, ws);
     return payload;
   },
+
+  async getAllAttendance(userId) {
+    if (!userId) return [];
+    const ws = await getUserWorkspace(userId);
+    return ws.attendance || [];
+  },
 };

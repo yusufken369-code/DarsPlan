@@ -174,7 +174,6 @@ export default function Jurnal() {
         grades.length > 0
           ? (grades.reduce((acc, g) => acc + g, 0) / grades.length).toFixed(1)
           : null;
-      const quarterGrade = avgGrade ? Math.round(Number(avgGrade)) : null;
 
       res[std.id] = {
         presentCount,
@@ -183,7 +182,6 @@ export default function Jurnal() {
         reasonCount,
         gradesCount: grades.length,
         avgGrade,
-        quarterGrade,
       };
     });
     return res;
@@ -227,7 +225,7 @@ export default function Jurnal() {
     // Header row
     const headers = ['#', 'F.I.SH.'];
     daysInMonth.forEach((d) => headers.push(`${d.dayNumber}-${d.weekdayShort}`));
-    headers.push('Qatnashdi (B)', "Yo'q (Y)", "O'rtacha", 'Chorak');
+    headers.push('Qatnashdi (B)', "Yo'q (Y)", "O'rtacha");
     csv += headers.join(';') + '\n';
 
     // Student rows
@@ -247,7 +245,6 @@ export default function Jurnal() {
       row.push(`${m?.presentCount || 0}`);
       row.push(`${m?.absentCount || 0}`);
       row.push(`${m?.avgGrade || '-'}`);
-      row.push(`${m?.quarterGrade || '-'}`);
       csv += row.join(';') + '\n';
     });
 
@@ -461,9 +458,6 @@ export default function Jurnal() {
                   <th className="py-3.5 px-3 text-center min-w-[75px] bg-indigo-50/50 dark:bg-indigo-950/20 text-[#3949ab] dark:text-indigo-300">
                     O'rtacha
                   </th>
-                  <th className="py-3.5 px-3 text-center min-w-[70px] bg-purple-50/50 dark:bg-purple-950/20 text-purple-800 dark:text-purple-300">
-                    Chorak
-                  </th>
                 </tr>
               </thead>
 
@@ -581,15 +575,6 @@ export default function Jurnal() {
                             }`}
                           >
                             {m.avgGrade}
-                          </span>
-                        ) : (
-                          <span className="text-gray-300 dark:text-slate-600">-</span>
-                        )}
-                      </td>
-                      <td className="py-2 px-2 text-center font-black bg-purple-50/30 dark:bg-purple-950/10">
-                        {m.quarterGrade ? (
-                          <span className="w-6 h-6 inline-flex items-center justify-center rounded-md bg-purple-600 text-white text-xs shadow-2xs font-extrabold">
-                            {m.quarterGrade}
                           </span>
                         ) : (
                           <span className="text-gray-300 dark:text-slate-600">-</span>

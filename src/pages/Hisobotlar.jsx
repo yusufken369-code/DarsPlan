@@ -32,7 +32,7 @@ export default function Hisobotlar() {
   // Class selection: 'all' or classId
   const [selectedClassId, setSelectedClassId] = useState('all');
 
-  // Period: 'this_month' | 'last_month' | 'quarter_1' | 'all_year'
+  // Period: 'this_month' | 'last_month' | 'all_year'
   const [period, setPeriod] = useState('this_month');
 
   const curYear = new Date().getFullYear();
@@ -66,10 +66,6 @@ export default function Hisobotlar() {
         const lastM = curMonth === 0 ? 12 : curMonth;
         const lastY = curMonth === 0 ? curYear - 1 : curYear;
         return y === lastY && m === lastM;
-      }
-      if (period === 'quarter_1') {
-        // Sep, Oct, Nov (months 9, 10, 11)
-        return m >= 9 && m <= 11;
       }
       return true; // all_year
     });
@@ -209,8 +205,6 @@ export default function Hisobotlar() {
       ? `Joriy oy (${UZ_MONTHS[curMonth]} ${curYear})`
       : period === 'last_month'
       ? `O'tgan oy (${UZ_MONTHS[(curMonth + 11) % 12]})`
-      : period === 'quarter_1'
-      ? `1-Chorak (Sentabr - Noyabr)`
       : `Barcha davr`;
 
   return (
@@ -292,7 +286,6 @@ export default function Hisobotlar() {
           {[
             { id: 'this_month', label: 'Shu oy' },
             { id: 'last_month', label: "O'tgan oy" },
-            { id: 'quarter_1', label: '1-Chorak' },
             { id: 'all_year', label: 'Barchasi' },
           ].map((p) => (
             <button

@@ -4,7 +4,7 @@ import {
   User, Mail, Lock, Eye, EyeOff,
   GraduationCap, CheckCircle2
 } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 /* ── validation helpers ─────────────────────────── */
 function validateForm({ name, email, password, role }) {
@@ -99,6 +99,7 @@ function DeskIllustration() {
 /* ── main SignUp page ───────────────────────────── */
 export default function SignUp() {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
 
   const [form, setForm] = useState({ name: '', email: '', password: '', role: 'teacher' });
   const [errors, setErrors] = useState({});
@@ -125,53 +126,34 @@ export default function SignUp() {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signUp({
+      const { data, error } = await signUp({
+        name: form.name.trim(),
         email: form.email.trim(),
         password: form.password,
-        options: {
-          data: {
-            full_name: form.name.trim(),
-            account_type: form.role,
-          },
-        },
+        role: form.role,
       });
 
       if (error) {
-        if (
-          error.message.includes('User already registered') ||
-          error.message.includes('already exists')
-        ) {
-          setApiError("Bu email manzili allaqachon ro'yxatdan o'tgan. Iltimos, tizimga kiring.");
-        } else if (error.message.includes('Password should be at least')) {
-          setApiError("Parol kamida 6 ta belgidan iborat bo'lishi kerak.");
-        } else if (error.status === 429 || error.message.includes('rate limit')) {
-          setApiError("Juda ko'p so'rov yuborildi. Iltimos, birozdan keyin qayta urinib ko'ring.");
-        } else {
-          setApiError(error.message || "Ro'yxatdan o'tishda xatolik yuz berdi.");
-        }
+        setApiError(error.message || "Ro'yxatdan o'tishda xatolik yuz berdi.");
         return;
       }
 
-      // Check if user already exists (Supabase identity obfuscation check)
-      if (data?.user && data.user.identities && data.user.identities.length === 0) {
-        setApiError("Bu email manzili allaqachon ro'yxatdan o'tgan. Iltimos, tizimga kiring.");
-        return;
-      }
-
-      // If active session was created immediately (email confirmation disabled in Supabase)
+      // If active session was created immediately
       if (data?.session) {
         navigate('/', { replace: true });
         return;
       }
 
       // Otherwise, email confirmation is required
-      setSuccessInfo({
-        needsConfirmation: true,
-        email: form.email.trim(),
-      });
+      if (data?.user) {
+        setSuccessInfo({
+          needsConfirmation: true,
+          email: form.email.trim(),
+        });
+      }
     } catch (err) {
       console.error('Sign up error:', err);
-      setApiError("Server bilan bog'lanishda xatolik yuz berdi.");
+      setApiError("Ro'yxatdan o'tishda xatolik yuz berdi. Iltimos, qayta urinib ko'ring.");
     } finally {
       setLoading(false);
     }

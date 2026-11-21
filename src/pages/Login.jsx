@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, GraduationCap } from 'lucide-react';
-import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 
 /* ─── Shared input style ────────────────────────────────────────── */
 const inputCls = (hasErr) =>
@@ -172,6 +172,7 @@ function ClassroomScene() {
 /* ─── Login page ────────────────────────────────────────────────── */
 export default function Login() {
   const navigate = useNavigate();
+  const { signIn } = useAuth();
 
   const [form, setForm]         = useState({ email: '', password: '' });
   const [remember, setRemember] = useState(false);
@@ -206,21 +207,13 @@ export default function Login() {
     setApiError('');
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await signIn({
         email: form.email.trim(),
         password: form.password,
       });
 
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          setApiError("Email yoki parol noto'g'ri.");
-        } else if (error.message.includes('Email not confirmed')) {
-          setApiError("Elektron pochtangiz hali tasdiqlanmagan. Iltimos, emailingizni tekshiring.");
-        } else if (error.status === 429 || error.message.includes('rate limit')) {
-          setApiError("Juda ko'p urinishlar bo'ldi. Birozdan so'ng qayta urinib ko'ring.");
-        } else {
-          setApiError(error.message || "Kirishda xatolik yuz berdi. Iltimos, qayta urinib ko'ring.");
-        }
+        setApiError(error.message || "Kirishda xatolik yuz berdi. Iltimos, qayta urinib ko'ring.");
         return;
       }
 
@@ -229,7 +222,7 @@ export default function Login() {
       }
     } catch (err) {
       console.error('Login error:', err);
-      setApiError("Server bilan bog'lanishda xatolik yuz berdi.");
+      setApiError("Kirishda xatolik yuz berdi. Iltimos, qayta urinib ko'ring.");
     } finally {
       setLoading(false);
     }

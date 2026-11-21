@@ -3,10 +3,9 @@ import { User, Mail, Lock, Shield, CheckCircle2, AlertCircle, LogOut, Save, Data
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { useTheme } from '../context/ThemeContext';
-import { supabase } from '../lib/supabase';
 
 export default function Sozlamalar() {
-  const { user, signOut } = useAuth();
+  const { user, signOut, updateUser } = useAuth();
   const { lessons, classes, materials, assignments, lessonPlans } = useData();
   const { theme, setTheme, isDark } = useTheme();
 
@@ -30,10 +29,8 @@ export default function Sozlamalar() {
     setNameMsg('');
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          full_name: fullName.trim(),
-        },
+      const { error } = await updateUser({
+        fullName: fullName.trim(),
       });
 
       if (error) {
@@ -43,7 +40,7 @@ export default function Sozlamalar() {
         setTimeout(() => setNameMsg(''), 4000);
       }
     } catch (err) {
-      setNameMsg("Server bilan bog'lanishda xatolik yuz berdi.");
+      setNameMsg("Ma'lumotlarni saqlashda xatolik yuz berdi.");
     } finally {
       setSavingName(false);
     }
@@ -66,7 +63,7 @@ export default function Sozlamalar() {
     setSavingPwd(true);
 
     try {
-      const { error } = await supabase.auth.updateUser({
+      const { error } = await updateUser({
         password: password,
       });
 
@@ -79,7 +76,7 @@ export default function Sozlamalar() {
         setTimeout(() => setPwdMsg(''), 4000);
       }
     } catch (err) {
-      setPwdError("Server bilan bog'lanishda xatolik yuz berdi.");
+      setPwdError("Parolni yangilashda xatolik yuz berdi.");
     } finally {
       setSavingPwd(false);
     }

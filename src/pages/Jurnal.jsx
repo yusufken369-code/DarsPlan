@@ -205,7 +205,7 @@ export default function Jurnal() {
 
     const classAvg = totalGradesCount > 0 ? (sumGrades / totalGradesCount).toFixed(1) : '-';
     const totalAttLessons = totalPresents + totalAbsents;
-    const attRate = totalAttLessons > 0 ? Math.round((totalPresents / totalAttLessons) * 100) : 100;
+    const attRate = totalAttLessons > 0 ? Math.round((totalPresents / totalAttLessons) * 100) : 0;
 
     return {
       classAvg,

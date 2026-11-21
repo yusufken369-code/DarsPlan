@@ -130,7 +130,7 @@ export default function Hisobotlar() {
 
     const totalAttendanceMarks = totalPresent + totalAbsent;
     const attendanceRate =
-      totalAttendanceMarks > 0 ? ((totalPresent / totalAttendanceMarks) * 100).toFixed(1) : 100;
+      totalAttendanceMarks > 0 ? Math.round((totalPresent / totalAttendanceMarks) * 100) : 0;
 
     const avgGrade = totalGrades > 0 ? (sumGrades / totalGrades).toFixed(1) : '-';
 
@@ -160,6 +160,7 @@ export default function Hisobotlar() {
       totalAbsent,
       totalLate,
       totalReason,
+      totalAttendanceMarks,
       attendanceRate,
       avgGrade,
       totalGrades,
@@ -338,12 +339,18 @@ export default function Hisobotlar() {
           </div>
           <div>
             <div className="flex items-baseline gap-2">
-              <span className="text-3xl font-black text-emerald-600 dark:text-emerald-400">
+              <span className={`text-3xl font-black ${stats.totalAttendanceMarks > 0 ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'}`}>
                 {stats.attendanceRate}%
               </span>
-              <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-md">
-                {Number(stats.attendanceRate) >= 90 ? "A'lo" : "O'rtacha"}
-              </span>
+              {stats.totalAttendanceMarks > 0 ? (
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950 px-2 py-0.5 rounded-md">
+                  {Number(stats.attendanceRate) >= 90 ? "A'lo" : Number(stats.attendanceRate) >= 70 ? "Yaxshi" : "O'rtacha"}
+                </span>
+              ) : (
+                <span className="text-xs font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                  0 ta qayd
+                </span>
+              )}
             </div>
             <div className="text-[11px] text-slate-400 mt-1">
               {stats.totalPresent} ta qatnashish, {stats.totalAbsent} ta qoldirish
@@ -458,7 +465,11 @@ export default function Hisobotlar() {
                   Davomat Ko'rsatkichlari Tafsiloti
                 </h3>
               </div>
-              <span className="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">
+              <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${
+                stats.totalAttendanceMarks > 0
+                  ? 'text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60'
+                  : 'text-slate-500 bg-slate-100 dark:bg-slate-800'
+              }`}>
                 {stats.attendanceRate}% qatnashish
               </span>
             </div>

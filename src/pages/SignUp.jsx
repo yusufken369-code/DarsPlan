@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   User, Mail, Lock, Eye, EyeOff,
-  GraduationCap, Users, CheckCircle2
+  GraduationCap, CheckCircle2
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -310,30 +310,16 @@ export default function SignUp() {
 
             {/* Hisob turi */}
             <Field label="Hisob turi" error={errors.role}>
-              <div className="flex gap-3">
-                {[
-                  { val: 'teacher', label: "O'qituvchi", Icon: GraduationCap },
-                  { val: 'other', label: 'Boshqa', Icon: Users },
-                ].map(({ val, label, Icon }) => {
-                  const active = form.role === val;
-                  return (
-                    <button
-                      key={val}
-                      type="button"
-                      disabled={loading}
-                      onClick={() => set('role', val)}
-                      className="flex-1 flex items-center justify-center gap-2 h-[44px] rounded-xl border-2 text-[13px] font-semibold transition-all duration-150"
-                      style={{
-                        borderColor: active ? '#3949ab' : '#e3e8f0',
-                        background: active ? '#3949ab' : '#f7f9fc',
-                        color: active ? '#ffffff' : '#90a4ae',
-                      }}
-                    >
-                      <Icon size={16} />
-                      {label}
-                    </button>
-                  );
-                })}
+              <div
+                className="w-full flex items-center justify-center gap-2 h-[44px] rounded-xl border-2 text-[13px] font-semibold select-none shadow-xs"
+                style={{
+                  borderColor: '#3949ab',
+                  background: '#3949ab',
+                  color: '#ffffff',
+                }}
+              >
+                <GraduationCap size={16} />
+                <span>O'qituvchi</span>
               </div>
             </Field>
 
